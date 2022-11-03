@@ -156,6 +156,9 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
       unpin() {
         pin = false;
       },
+      is_pined() {
+        return pin === true;
+      },
     };
     return result;
   };
@@ -232,7 +235,19 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
   );
   window.addEventListener("mouseover", on_mouse_in);
   window.addEventListener("mouseout", on_mouse_out);
+  const routeSub = onRouteChange(() => {
+    document.querySelectorAll(".jsPanel").forEach((panelEl) => {
+      const panel = get_panel_from_target(panelEl);
+      if (!panel._manager) {
+        return;
+      }
+      if (!panel._manager.is_pined()) {
+        panel.close()
+      }
+    });
+  });
   return () => {
+    routeSub();
     window.removeEventListener("mouseover", on_mouse_in);
     window.removeEventListener("mouseout", on_mouse_out);
     document.removeEventListener(
@@ -252,3 +267,17 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
     );
   };
 }
+
+const onRouteChange = (cb: () => void) => {
+  const onhashchange = window.onhashchange?.bind(window);
+
+  window.onhashchange = (evt) => {
+    onhashchange?.call(window, evt);
+    setTimeout(() => {
+      cb();
+    }, 200);
+  };
+  return () => {
+    window.onhashchange = onhashchange;
+  };
+};

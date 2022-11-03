@@ -15,6 +15,7 @@ type PanelManager = {
   keep(): void;
   pin(): void;
   unpin(): void;
+  is_pined(): boolean;
 };
 
 declare module "jspanel4" {
