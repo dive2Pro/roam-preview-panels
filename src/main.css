@@ -1,0 +1,20 @@
+.jsPanel-content .page{
+    overflow: hidden;
+}
+
+.jsPanel-content .page > div:first-child {
+  margin-top: -30px;
+  margin-left: -30px;
+}
+
+.jsPanel-content .page .rm-block-separator {
+    min-width: 0px;
+    max-width: 10px;
+    flex: 0 0 0px;
+}
+
+.jsPanel-content .panel-title {
+    width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
