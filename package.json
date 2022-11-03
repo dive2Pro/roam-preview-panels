@@ -1,5 +1,5 @@
 {
-  "name": "@dive2pro/roam-hover-panels",
+  "name": "@dive2pro/roam-preview-panels",
   "version": "0.0.1",
   "description": "hover over a page or block reference and preview editable contents of that page or block, and allow you transform the preview into a float panel, and more ",
   "main": "dist/extension.js",
@@ -10,15 +10,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dive2Pro/roam-hover-preview.git"
+    "url": "git+https://github.com/dive2Pro/roam-preview-panels.git"
   },
   "keywords": [],
   "author": "hyc",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/dive2Pro/roam-hover-preview/issues"
+    "url": "https://github.com/dive2Pro/roam-preview-panels/issues"
   },
-  "homepage": "https://github.com/dive2Pro/roam-hover-preview#readme",
+  "homepage": "https://github.com/dive2Pro/roam-preview-panels#readme",
   "dependencies": {
     "jspanel4": "^4.16.0",
     "roamjs-components": "^0.72.9"
