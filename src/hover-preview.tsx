@@ -36,14 +36,7 @@ function getUidFromTarget(target: HTMLElement) {
  * @returns
  */
 
-type PanelManager = {
-  create(): void;
-  destroy(): void;
-  keep(): void;
-};
 const panels_map = new Map<string, PanelManager>();
-
-const mm = new WeakMap<HTMLElement, PanelManager>();
 
 const delay = async (ms: number) => {
   return new Promise((resolve) => {
@@ -64,20 +57,26 @@ const get_block_title = (block: PullBlock) =>
 const CONFIG_KEYS = {
   DELAY: "delay",
 };
+
+const get_panel_from_target = (target: any) => {
+  return target as Panel | undefined;
+};
+
+const get_panel_id = (uid: string) => "panel-" + uid;
+
 const panel_creator = (extensionAPI: RoamExtensionAPI) => {
   const DELAY_ms =
     (extensionAPI.settings.get(CONFIG_KEYS.DELAY) as number) || 300;
 
   return (event: MouseEvent, uid: string) => {
     let panelInstance: Panel | undefined;
-    const PANEL_ID = "panel-" + uid;
     const EL_ID = "preview";
     const rect = (event.target as HTMLElement).getBoundingClientRect();
-
     const block = get_block(uid);
+    let pin = false;
     const init = async () => {
       panelInstance = jsPanel.create({
-        id: PANEL_ID,
+        id: get_panel_id(uid),
         content: `<div id="${EL_ID}" class="${
           is_page(block) ? "page" : ""
         }" />`,
@@ -86,15 +85,16 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
           my: "left-top",
           at: "left-top",
           offsetX: rect.x,
-          offsetY: rect.y + rect.height + 10,
+          offsetY: rect.y + rect.height + 5,
         },
       });
-
       await delay(10);
+      panelInstance._manager = result;
+
       const el = document
-        .querySelector(`#${PANEL_ID}`)
+        .querySelector(`#${get_panel_id(uid)}`)
         .querySelector(`#${EL_ID}`);
-      console.log(panelInstance, el);
+      console.log(panelInstance, el, "AAAAAAA");
 
       if (!el) {
         return;
@@ -105,32 +105,46 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
       });
     };
 
-    let destroyFn = () => {};
+    let destroyFn = () => {
+      panelInstance.close?.();
+      panels_map.delete(get_panel_id(uid));
+    };
 
     let createFn = () => {
       let timeoutId = setTimeout(init, DELAY_ms);
+      const origin_fn = destroyFn;
       destroyFn = () => {
         clearInterval(timeoutId);
-        destroy_finally();
+        origin_fn();
       };
     };
-    const destroy_finally = () => {
-      panels_map.delete(uid);
-    };
+
     const destroy_by_moveout_of_uid_target = () => {
-      panelInstance?.close();
-      destroyFn();
+      if (!pin) {
+        destroyFn();
+      }
     };
-    const destroy_by_moveout_of_panel = () => {};
-    return {
+    let timeout_id_for_remove_by_moveout_of_uid_target: any;
+    const result = {
       create() {
         createFn();
       },
-      destroy() {
-        // destroy_by_moveout_of_uid_target();
+      destroy(immediately: boolean = false) {
+        timeout_id_for_remove_by_moveout_of_uid_target = setTimeout(() => {
+          destroy_by_moveout_of_uid_target();
+        }, DELAY_ms - 50);
       },
-      keep() {},
+      keep() {
+        clearTimeout(timeout_id_for_remove_by_moveout_of_uid_target);
+      },
+      pin() {
+        pin = true;
+      },
+      unpin() {
+        pin = false;
+      },
     };
+    return result;
   };
 };
 
@@ -138,37 +152,74 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
   const panel_factory = panel_creator(extensionAPI);
   const on_mouse_in = (el: MouseEvent) => {
     const uid = getUidFromTarget(el.target as HTMLElement);
-    console.log("mouse in", uid);
     if (uid) {
-      let panel = mm.get(el.target as HTMLElement);
+      let panel = panels_map.get(get_panel_id(uid));
       //   let panel = panels_map.get(uid);
       console.log(panel, " = create");
       if (!panel) {
         panel = panel_factory(el, uid);
-        panels_map.set(uid, panel);
         panel.create();
+        panels_map.set(get_panel_id(uid), panel);
       } else {
         panel.keep();
+      }
+    } else if (typeof el.target === "object") {
+      const t = el.target as HTMLElement;
+      const panel = t.closest(".jsPanel") as any;
+      if (panel?._manager) {
+        panel._manager.keep();
       }
     }
   };
 
   const on_mouse_out = (el: MouseEvent) => {
     const uid = getUidFromTarget(el.target as HTMLElement);
-    console.log("out: ", uid);
-
     if (uid) {
-      const panel = panels_map.get(uid);
+      const panel = panels_map.get(get_panel_id(uid));
       if (panel) {
         panel.destroy();
       }
+    } else if (typeof el.target === "object") {
+      const t = el.target as HTMLElement;
+      const is_moveout_of_panel = t.className.includes?.(
+        "jsPanel-resizeit-handle"
+      );
+      if (is_moveout_of_panel) {
+        const p = get_panel_from_target(t.closest(".jsPanel"));
+        p?._manager?.destroy();
+      }
     }
   };
+  // setup event handler function
+  let on_jspaneldragstart = function (event: any) {
+    //   console.log(event.panel, event.detail, "aa");
+    const panel = get_panel_from_target(event.panel);
+    panel._manager.pin();
+  };
+  // setup event handler function
+  let on_jspanelclosed = function (event: any) {
+    // do whatever needs to be done ..
+    const panel = get_panel_from_target(event.panel);
+    panel._manager.unpin();
+    panel._manager.destroy(true);
+  };
 
+  document.addEventListener("jspanelbeforeclose", on_jspanelclosed, false);
+  document.addEventListener("jspaneldragstart", on_jspaneldragstart, false);
   window.addEventListener("mouseover", on_mouse_in);
   window.addEventListener("mouseout", on_mouse_out);
   return () => {
     window.removeEventListener("mouseover", on_mouse_in);
     window.removeEventListener("mouseout", on_mouse_out);
+    document.removeEventListener(
+      "jspaneldragstart",
+      on_jspaneldragstart,
+      false
+    );
+    document.removeEventListener(
+      "jspanelbeforeclose",
+      on_jspaneldragstart,
+      false
+    );
   };
 }

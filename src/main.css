@@ -17,4 +17,5 @@
     width: 100%;
     text-overflow: ellipsis;
     overflow: hidden;
+    font-variant-caps: initial;
 }
