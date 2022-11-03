@@ -63,7 +63,7 @@ const get_panel_from_target = (target: any) => {
 };
 
 const get_panel_id = (uid: string) => "panel-" + uid;
-
+let id_increment = 0;
 const panel_creator = (extensionAPI: RoamExtensionAPI) => {
   const DELAY_ms =
     (extensionAPI.settings.get(CONFIG_KEYS.DELAY) as number) || 300;
@@ -74,9 +74,14 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
     const rect = (event.target as HTMLElement).getBoundingClientRect();
     const block = get_block(uid);
     let pin = false;
+    let panelId = get_panel_id(uid) + id_increment;
+    if (document.querySelector("#" + panelId)) {
+      return;
+    }
+
     const init = async () => {
       panelInstance = jsPanel.create({
-        id: get_panel_id(uid),
+        id: panelId,
         content: `<div id="${EL_ID}" class="${
           is_page(block) ? "page" : ""
         }" />`,
@@ -90,15 +95,16 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
       });
       await delay(10);
       panelInstance._manager = result;
+      id_increment++;
 
       const el = document
-        .querySelector(`#${get_panel_id(uid)}`)
-        .querySelector(`#${EL_ID}`);
-      console.log(panelInstance, el, "AAAAAAA");
+        .querySelector(`#${panelId}`)
+        ?.querySelector(`#${EL_ID}`);
 
       if (!el) {
         return;
       }
+
       window.roamAlphaAPI.ui.components.renderBlock({
         uid,
         el: el as HTMLElement,
@@ -106,7 +112,9 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
     };
 
     let destroyFn = () => {
-      panelInstance.close?.();
+      if (panelInstance) {
+        panelInstance.close();
+      }
       panels_map.delete(get_panel_id(uid));
     };
 
@@ -132,13 +140,18 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
       destroy(immediately: boolean = false) {
         timeout_id_for_remove_by_moveout_of_uid_target = setTimeout(() => {
           destroy_by_moveout_of_uid_target();
-        }, DELAY_ms - 50);
+        }, 100);
       },
       keep() {
         clearTimeout(timeout_id_for_remove_by_moveout_of_uid_target);
       },
       pin() {
-        pin = true;
+        if (!pin) {
+          pin = true;
+          // change map
+          id_increment++;
+          panels_map.delete(get_panel_id(uid));
+        }
       },
       unpin() {
         pin = false;
@@ -155,7 +168,7 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
     if (uid) {
       let panel = panels_map.get(get_panel_id(uid));
       //   let panel = panels_map.get(uid);
-      console.log(panel, " = create");
+      console.log(panel, " = create", id_increment);
       if (!panel) {
         panel = panel_factory(el, uid);
         panel.create();
@@ -196,16 +209,27 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
     const panel = get_panel_from_target(event.panel);
     panel._manager.pin();
   };
-  // setup event handler function
   let on_jspanelclosed = function (event: any) {
-    // do whatever needs to be done ..
     const panel = get_panel_from_target(event.panel);
+    if (!panel._manager) {
+      return;
+    }
     panel._manager.unpin();
     panel._manager.destroy(true);
+  };
+  let on_jspanelstatuschange = function (event: any) {
+    const panel = get_panel_from_target(event.panel);
+    console.log("status change");
+    panel._manager.pin();
   };
 
   document.addEventListener("jspanelbeforeclose", on_jspanelclosed, false);
   document.addEventListener("jspaneldragstart", on_jspaneldragstart, false);
+  document.addEventListener(
+    "jspanelstatuschange",
+    on_jspanelstatuschange,
+    false
+  );
   window.addEventListener("mouseover", on_mouse_in);
   window.addEventListener("mouseout", on_mouse_out);
   return () => {
@@ -218,6 +242,11 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
     );
     document.removeEventListener(
       "jspanelbeforeclose",
+      on_jspaneldragstart,
+      false
+    );
+    document.removeEventListener(
+      "jspanelstatuschange",
       on_jspaneldragstart,
       false
     );

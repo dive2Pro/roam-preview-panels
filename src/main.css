@@ -13,9 +13,17 @@
     flex: 0 0 0px;
 }
 
-.jsPanel-content .panel-title {
+.jsPanel .panel-title {
     width: 100%;
     text-overflow: ellipsis;
     overflow: hidden;
     font-variant-caps: initial;
+}
+
+.jsPanel-replacement {
+    /* max-width: 350px; */
+    width: unset;
+    /* overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis; */
 }
