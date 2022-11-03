@@ -8,7 +8,6 @@ hover over a page or block reference and preview editable contents of that page 
 - The page preview panel is now an actual block editor instance
 - Panels can now be dragged and resized, and minimized and maximized
 - The panel can now be pinned to prevent it from auto closing
-- The panel can be minimal,
   
 # video
 

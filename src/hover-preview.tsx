@@ -213,7 +213,7 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
       return;
     }
     panel._manager.unpin();
-    panel._manager.destroy(true);
+    panel._manager.destroy();
   };
   let on_jspanelstatuschange = function (event: any) {
     const panel = get_panel_from_target(event.panel);
