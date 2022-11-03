@@ -1,5 +1,3 @@
-import getBlockUidFromTarget from "roamjs-components/dom/getBlockUidFromTarget";
-import getReferenceBlockUid from "roamjs-components/dom/getReferenceBlockUid";
 import { jsPanel, Panel } from "jspanel4";
 import "jspanel4/es6module/jspanel.min.css";
 import "./main.css";
@@ -137,7 +135,7 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
       create() {
         createFn();
       },
-      destroy(immediately: boolean = false) {
+      destroy() {
         timeout_id_for_remove_by_moveout_of_uid_target = setTimeout(() => {
           destroy_by_moveout_of_uid_target();
         }, 100);
@@ -170,8 +168,7 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
     const uid = getUidFromTarget(el.target as HTMLElement);
     if (uid) {
       let panel = panels_map.get(get_panel_id(uid));
-      //   let panel = panels_map.get(uid);
-      console.log(panel, " = create", id_increment);
+      // console.log(panel, " = create", id_increment);
       if (!panel) {
         panel = panel_factory(el, uid);
         panel.create();
@@ -206,9 +203,7 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
       }
     }
   };
-  // setup event handler function
   let on_jspaneldragstart = function (event: any) {
-    //   console.log(event.panel, event.detail, "aa");
     const panel = get_panel_from_target(event.panel);
     panel._manager.pin();
   };
@@ -242,7 +237,7 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
         return;
       }
       if (!panel._manager.is_pined()) {
-        panel.close()
+        panel.close();
       }
     });
   });

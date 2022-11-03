@@ -1,9 +1,10 @@
 import { hoverPreviewInit } from "./hover-preview";
 
 let initial = (extensionAPI: RoamExtensionAPI) => {
-  const hierarchyUnload = hoverPreviewInit(extensionAPI);
+  const hoverPreviewUnload = hoverPreviewInit(extensionAPI);
+
   return () => {
-    hierarchyUnload();
+    hoverPreviewUnload();
   };
 };
 

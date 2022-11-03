@@ -11,7 +11,7 @@ type RoamExtensionAPI = {
 
 type PanelManager = {
   create(): void;
-  destroy(immediately: boolean = false): void;
+  destroy(): void;
   keep(): void;
   pin(): void;
   unpin(): void;

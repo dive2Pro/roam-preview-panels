@@ -1,7 +1,7 @@
 {
-  "name": "@dive2pro/roam-hover-preview",
+  "name": "@dive2pro/roam-hover-panels",
   "version": "0.0.1",
-  "description": "",
+  "description": "hover over a page or block reference and preview editable contents of that page or block, and allow you transform the preview into a float panel, and more ",
   "main": "dist/extension.js",
   "scripts": {
     "build-web": "roamjs-scripts build",
