@@ -58,7 +58,8 @@ const is_page = (block: PullBlock) => {
   return block[":node/title"] !== undefined;
 };
 
-const get_block_title = (block: PullBlock) => block[":node/title"] || block[":block/string"]
+const get_block_title = (block: PullBlock) =>
+  block[":node/title"] || block[":block/string"];
 
 const CONFIG_KEYS = {
   DELAY: "delay",
@@ -67,10 +68,12 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
   const DELAY_ms =
     (extensionAPI.settings.get(CONFIG_KEYS.DELAY) as number) || 300;
 
-  return (el: MouseEvent, uid: string) => {
+  return (event: MouseEvent, uid: string) => {
     let panelInstance: Panel | undefined;
     const PANEL_ID = "panel-" + uid;
     const EL_ID = "preview";
+    const rect = (event.target as HTMLElement).getBoundingClientRect();
+
     const block = get_block(uid);
     const init = async () => {
       panelInstance = jsPanel.create({
@@ -79,6 +82,12 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
           is_page(block) ? "page" : ""
         }" />`,
         headerTitle: `<div class="panel-title">${get_block_title(block)}</div>`,
+        position: {
+          my: "left-top",
+          at: "left-top",
+          offsetX: rect.x,
+          offsetY: rect.y + rect.height + 10,
+        },
       });
 
       await delay(10);
