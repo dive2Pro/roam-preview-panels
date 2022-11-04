@@ -21,7 +21,8 @@ type PanelManager = {
 declare module "jspanel4" {
   export type Panel = {
     close(): void;
-    _manager: PanelManager
+    _manager: PanelManager;
+    content: HTMLElement
   };
   export const jsPanel = {
     create(obj: object): Panel;,

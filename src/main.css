@@ -27,3 +27,11 @@
     white-space: nowrap;
     text-overflow: ellipsis; */
 }
+
+.jsPanel .empty-add {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor:pointer;
+}

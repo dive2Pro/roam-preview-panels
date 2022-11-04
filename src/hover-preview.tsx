@@ -49,6 +49,10 @@ const is_page = (block: PullBlock) => {
   return block[":node/title"] !== undefined;
 };
 
+const is_page_empty = (block: PullBlock) => {
+  return !block[":block/children"];
+};
+
 const get_block_title = (block: PullBlock) =>
   block[":node/title"] || block[":block/string"];
 
@@ -59,6 +63,40 @@ const CONFIG_KEYS = {
 const get_panel_from_target = (target: any) => {
   return target as Panel | undefined;
 };
+const EL_ID = "preview";
+
+const render_roam_block_on = (panelId: string, uid: string) => {
+  const el = document.querySelector(`#${panelId}`)?.querySelector(`#${EL_ID}`);
+
+  if (!el) {
+    return;
+  }
+  // 检查页面是否是空的, 如果是, 则新建一个"点击"创建的蒙层
+  window.roamAlphaAPI.ui.components.renderBlock({
+    uid,
+    el: el as HTMLElement,
+  });
+};
+
+const create_block_on_page = async (uid: string) => {
+  const block_uid = window.roamAlphaAPI.util.generateUID();
+  await window.roamAlphaAPI.data.block.create({
+    location: {
+      "parent-uid": uid,
+      order: 0,
+    },
+    block: {
+      string: "",
+      uid: block_uid,
+    },
+  });
+  window.roamAlphaAPI.ui.setBlockFocusAndSelection({
+    location: {
+      "block-uid": block_uid,
+      "window-id": 'main-window'    
+    }
+  })
+};
 
 const get_panel_id = (uid: string) => "panel-" + uid;
 let id_increment = 0;
@@ -68,7 +106,6 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
 
   return (event: MouseEvent, uid: string) => {
     let panelInstance: Panel | undefined;
-    const EL_ID = "preview";
     const rect = (event.target as HTMLElement).getBoundingClientRect();
     const block = get_block(uid);
     let pin = false;
@@ -80,9 +117,23 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
     const init = async () => {
       panelInstance = jsPanel.create({
         id: panelId,
-        content: `<div id="${EL_ID}" class="${
-          is_page(block) ? "page" : ""
-        }" />`,
+        content: (panel: Panel) => {
+          const blockEl = document.createElement("div");
+          blockEl.id = EL_ID;
+          blockEl.className = is_page(block) ? "page" : "";
+          panel.content.append(blockEl);
+
+          if (is_page_empty(block)) {
+            let el = document.createElement("p");
+            el.className = "empty-add";
+            el.textContent = "The page is empty, click to add content.";
+            panel.content.append(el);
+            el.addEventListener("click", () => {
+              create_block_on_page(uid);
+              el.parentNode.removeChild(el);
+            });
+          }
+        },
         headerTitle: `<div class="panel-title">${get_block_title(block)}</div>`,
         position: {
           my: "left-top",
@@ -95,18 +146,7 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
       panelInstance._manager = result;
       id_increment++;
 
-      const el = document
-        .querySelector(`#${panelId}`)
-        ?.querySelector(`#${EL_ID}`);
-
-      if (!el) {
-        return;
-      }
-
-      window.roamAlphaAPI.ui.components.renderBlock({
-        uid,
-        el: el as HTMLElement,
-      });
+      render_roam_block_on(panelId, uid);
     };
 
     let destroyFn = () => {
