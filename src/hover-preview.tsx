@@ -134,12 +134,7 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
           }
         },
         headerTitle: `<div class="panel-title">${get_block_title(block)}</div>`,
-        position: {
-          my: "left-top",
-          at: "left-top",
-          offsetX: rect.x,
-          offsetY: rect.y,
-        },
+        position: adjust_panel_start_position(rect),
       });
       await delay(10);
       panelInstance._manager = result;
@@ -198,6 +193,24 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
       },
     };
     return result;
+  };
+};
+
+const adjust_panel_start_position = (rect: { x: number; y: number }) => {
+  const window_height = window.innerHeight;
+  if (rect.y + 200 >= window_height) {
+    return {
+      my: "left-bottom",
+      at: "left-top",
+      offsetX: rect.x,
+      offsetY: rect.y - 30,
+    };
+  }
+  return {
+    my: "left-top",
+    at: "left-top",
+    offsetX: rect.x,
+    offsetY: rect.y,
   };
 };
 
