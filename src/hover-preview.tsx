@@ -4,6 +4,7 @@ import "./main.css";
 import { PullBlock } from "roamjs-components/types";
 const ATTRIBUTE_PAGE = "data-link-uid";
 const ATTRIBUTE_BLOCK = "data-uid";
+const ATTRIBUTE_TAG = "data-tag";
 
 function getUidFromTarget(target: HTMLElement) {
   const blockEl = target.closest(`[${ATTRIBUTE_BLOCK}]`);
@@ -14,6 +15,14 @@ function getUidFromTarget(target: HTMLElement) {
   const pageRef = target.closest(`[${ATTRIBUTE_PAGE}]`);
   if (pageRef) {
     return pageRef.getAttribute(ATTRIBUTE_PAGE);
+  }
+
+  const tag = target.getAttribute(ATTRIBUTE_TAG);
+
+  if (tag) {
+    return window.roamAlphaAPI.data.pull("[*]", [":node/title", tag])?.[
+      ":block/uid"
+    ];
   }
   //     const aliasTooltip = target.closest(".rm-alias-tooltip__content");
 
@@ -198,7 +207,7 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
 
 const adjust_panel_start_position = (rect: { x: number; y: number }) => {
   const window_height = window.innerHeight;
-  if (rect.y + 200 >= window_height) {
+  if (rect.y + 230 >= window_height) {
     return {
       my: "left-bottom",
       at: "left-top",
