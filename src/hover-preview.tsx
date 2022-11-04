@@ -50,7 +50,7 @@ const is_page = (block: PullBlock) => {
 };
 
 const is_page_empty = (block: PullBlock) => {
-  return !block[":block/children"];
+  return !block[":block/children"] && block[":block/string"] === undefined;
 };
 
 const get_block_title = (block: PullBlock) =>
@@ -93,9 +93,9 @@ const create_block_on_page = async (uid: string) => {
   window.roamAlphaAPI.ui.setBlockFocusAndSelection({
     location: {
       "block-uid": block_uid,
-      "window-id": 'main-window'    
-    }
-  })
+      "window-id": "main-window",
+    },
+  });
 };
 
 const get_panel_id = (uid: string) => "panel-" + uid;
@@ -104,9 +104,8 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
   const DELAY_ms =
     (extensionAPI.settings.get(CONFIG_KEYS.DELAY) as number) || 300;
 
-  return (event: MouseEvent, uid: string) => {
+  return (rect: { x: number; y: number }, uid: string) => {
     let panelInstance: Panel | undefined;
-    const rect = (event.target as HTMLElement).getBoundingClientRect();
     const block = get_block(uid);
     let pin = false;
     let panelId = get_panel_id(uid) + id_increment;
@@ -139,7 +138,7 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
           my: "left-top",
           at: "left-top",
           offsetX: rect.x,
-          offsetY: rect.y + rect.height + 5,
+          offsetY: rect.y,
         },
       });
       await delay(10);
@@ -202,15 +201,62 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
   };
 };
 
+function create_on_block_context_memu(
+  panel_factory: ReturnType<typeof panel_creator>
+) {
+  const LABEL = "open in preview panel";
+  let block_memu_position = {
+    x: 0,
+    y: 0,
+  };
+  window.roamAlphaAPI.ui.blockContextMenu.addCommand({
+    label: LABEL,
+    // @ts-ignore
+    "display-conditional": (e) => true,
+    callback: (e) => {
+      e["block-uid"];
+      const panel = panel_factory(block_memu_position, e["block-uid"]);
+      panel.create();
+      panel.pin();
+    },
+  });
+  const on_right_mouse_click = function (e: MouseEvent) {
+    var isRightMB;
+    if ("which" in e)
+      // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
+      isRightMB = e.which == 3;
+    else if ("button" in e)
+      // IE, Opera
+      isRightMB = e.button == 2;
+    if (isRightMB) {
+      block_memu_position.x = e.clientX + 10;
+      block_memu_position.y = e.clientY + 10;
+    }
+  };
+  window.addEventListener("mousedown", on_right_mouse_click);
+  return () => {
+    window.removeEventListener("mousedown", on_right_mouse_click);
+    window.roamAlphaAPI.ui.blockContextMenu.removeCommand({ label: LABEL });
+  };
+}
+
 export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
   const panel_factory = panel_creator(extensionAPI);
+
   const on_mouse_in = (el: MouseEvent) => {
     const uid = getUidFromTarget(el.target as HTMLElement);
     if (uid) {
       let panel = panels_map.get(get_panel_id(uid));
       // console.log(panel, " = create", id_increment);
       if (!panel) {
-        panel = panel_factory(el, uid);
+        const rect = (el.target as HTMLElement).getBoundingClientRect();
+        panel = panel_factory(
+          {
+            x: rect.x,
+            y: rect.y + rect.height + 5,
+          },
+          uid
+        );
         panel.create();
         panels_map.set(get_panel_id(uid), panel);
       } else {
@@ -281,8 +327,10 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
       }
     });
   });
+  const unsub_create_context = create_on_block_context_memu(panel_factory);
   return () => {
     routeSub();
+    unsub_create_context();
     window.removeEventListener("mouseover", on_mouse_in);
     window.removeEventListener("mouseout", on_mouse_out);
     document.removeEventListener(
