@@ -2,6 +2,7 @@ import { jsPanel, Panel } from "jspanel4";
 import "jspanel4/es6module/jspanel.min.css";
 import "./main.css";
 import { PullBlock } from "roamjs-components/types";
+import { read_panel_size } from "./config";
 const ATTRIBUTE_PAGE = "data-link-uid";
 const ATTRIBUTE_BLOCK = "data-uid";
 const ATTRIBUTE_TAG = "data-tag";
@@ -144,6 +145,7 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
         },
         headerTitle: `<div class="panel-title">${get_block_title(block)}</div>`,
         position: adjust_panel_start_position(rect),
+        panelSize: read_panel_size(extensionAPI)
       });
       await delay(10);
       panelInstance._manager = result;
