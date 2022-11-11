@@ -193,6 +193,7 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
           id_increment++;
           panels_map.delete(get_panel_id(uid));
         }
+        panelInstance.front()
       },
       unpin() {
         pin = false;
