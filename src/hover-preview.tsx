@@ -150,6 +150,19 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
       id_increment++;
 
       render_roam_block_on(panelId, uid);
+      const un_watch = watch_roam_block_string_change_on(
+        uid,
+        (before, after) => {
+          panelInstance.setHeaderTitle(
+            `<div class="panel-title">${after[":block/string"]}</div>`
+          );
+        }
+      );
+      const origin_destroy_fn = destroyFn;
+      destroyFn = () => {
+        un_watch();
+        origin_destroy_fn();
+      };
     };
 
     let destroyFn = () => {
@@ -193,7 +206,6 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
           id_increment++;
           panels_map.delete(get_panel_id(uid));
         }
-        panelInstance.front()
       },
       unpin() {
         pin = false;
@@ -315,6 +327,7 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
   let on_jspaneldragstart = function (event: any) {
     const panel = get_panel_from_target(event.panel);
     panel._manager.pin();
+    panel.front();
   };
   let on_jspanelclosed = function (event: any) {
     const panel = get_panel_from_target(event.panel);
@@ -387,3 +400,23 @@ const onRouteChange = (cb: () => void) => {
     window.onhashchange = onhashchange;
   };
 };
+function watch_roam_block_string_change_on(
+  uid: string,
+  cb: (
+    b: { ":block/string": string },
+    after: { ":block/string": string }
+  ) => void
+) {
+  window.roamAlphaAPI.data.addPullWatch(
+    "[:block/string :block/string]",
+    `[:block/uid "${uid}"]`,
+    cb
+  );
+  return () => {
+    window.roamAlphaAPI.data.removePullWatch(
+      "[:block/string :block/string]",
+      `[:block/uid "${uid}"]`,
+      cb
+    );
+  };
+}

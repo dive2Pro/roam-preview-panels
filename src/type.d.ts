@@ -24,6 +24,7 @@ declare module "jspanel4" {
     _manager: PanelManager;
     content: HTMLElement;
     front(): void;
+    setHeaderTitle(title: string): void;
   };
   export const jsPanel = {
     create(obj: object): Panel;,
