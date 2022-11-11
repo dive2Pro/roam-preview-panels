@@ -9,6 +9,19 @@ type RoamExtensionAPI = {
   };
 };
 
+
+type PanelState = {
+  uid: string;
+  id: string;
+  position: {
+    height: number;
+    width: number;
+    left: number;
+    top: number;
+  };
+  status: string;
+};
+
 type PanelManager = {
   create(): void;
   destroy(): void;
@@ -16,6 +29,7 @@ type PanelManager = {
   pin(): void;
   unpin(): void;
   is_pined(): boolean;
+  restore(panel: PanelState): void;
 };
 
 declare module "jspanel4" {
@@ -25,7 +39,14 @@ declare module "jspanel4" {
     content: HTMLElement;
     front(): void;
     setHeaderTitle(title: string): void;
-  };
+    status: string;
+    currentData: {
+      height: string;
+      width: string;
+      left: string;
+      top: string;
+    };
+  } & HTMLDivElement;
   export const jsPanel = {
     create(obj: object): Panel;,
   };

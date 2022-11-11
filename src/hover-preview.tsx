@@ -2,7 +2,12 @@ import { jsPanel, Panel } from "jspanel4";
 import "jspanel4/es6module/jspanel.min.css";
 import "./main.css";
 import { PullBlock } from "roamjs-components/types";
-import { read_panel_size } from "./config";
+import {
+  read_panels_status,
+  read_panel_size,
+  reset_panel_status,
+  save_panels_status_initial,
+} from "./config";
 const ATTRIBUTE_PAGE = "data-link-uid";
 const ATTRIBUTE_BLOCK = "data-uid";
 const ATTRIBUTE_TAG = "data-tag";
@@ -110,10 +115,11 @@ const create_block_on_page = async (uid: string) => {
 
 const get_panel_id = (uid: string) => "panel-" + uid;
 let id_increment = 0;
+
 const panel_creator = (extensionAPI: RoamExtensionAPI) => {
   const DELAY_ms =
     (extensionAPI.settings.get(CONFIG_KEYS.DELAY) as number) || 300;
-
+  const panel_status_operator = save_panels_status_initial(extensionAPI);
   return (rect: { x: number; y: number }, uid: string) => {
     let panelInstance: Panel | undefined;
     const block = get_block(uid);
@@ -123,7 +129,7 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
       return;
     }
 
-    const init = async () => {
+    const init = async (panel?: PanelState) => {
       panelInstance = jsPanel.create({
         id: panelId,
         content: (panel: Panel) => {
@@ -145,8 +151,17 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
         },
         headerTitle: `<div class="panel-title">${get_block_title(block)}</div>`,
         position: adjust_panel_start_position(rect),
-        panelSize: read_panel_size(extensionAPI)
+        panelSize: read_panel_size(extensionAPI, panel),
+        setStatus: panel?.status
       });
+      if (panel) {
+        panelInstance.currentData = {
+          height: panel.position.height + 'px',
+          top: panel.position.top + 'px',
+          left: panel.position.left + 'px',
+          width: panel.position.width + 'px',
+        }
+      }
       await delay(10);
       panelInstance._manager = result;
       id_increment++;
@@ -172,6 +187,7 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
         panelInstance.close();
       }
       panels_map.delete(get_panel_id(uid));
+      panel_status_operator.delete(panelInstance.id);
     };
 
     let createFn = () => {
@@ -189,9 +205,9 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
       }
     };
     let timeout_id_for_remove_by_moveout_of_uid_target: any;
-    const result = {
+    const result: PanelManager = {
       create() {
-        createFn();
+        return createFn();
       },
       destroy() {
         timeout_id_for_remove_by_moveout_of_uid_target = setTimeout(() => {
@@ -208,6 +224,22 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
           id_increment++;
           panels_map.delete(get_panel_id(uid));
         }
+        if (!panelInstance) {
+          return;
+        }
+        // save panels status
+        const { width, height, left, top } = panelInstance.currentData;
+        panel_status_operator.save({
+          uid,
+          id: panelInstance.id,
+          position: {
+            width: parseFloat(width),
+            height: parseFloat(height),
+            left: parseFloat(left),
+            top: parseFloat(top),
+          },
+          status: panelInstance.status,
+        });
       },
       unpin() {
         pin = false;
@@ -215,12 +247,19 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
       is_pined() {
         return pin === true;
       },
+      async restore(panel) {
+        await init(panel);
+        result?.pin();
+      },
     };
     return result;
   };
 };
 
-const adjust_panel_start_position = (rect: { x: number; y: number }) => {
+const adjust_panel_start_position = (
+  rect: { x: number; y: number },
+) => {
+  
   const window_height = window.innerHeight;
   if (rect.y + 230 >= window_height) {
     return {
@@ -279,6 +318,27 @@ function create_on_block_context_memu(
 
 export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
   const panel_factory = panel_creator(extensionAPI);
+
+  function restore_panels(
+    extensionAPI: RoamExtensionAPI,
+    panel_factory: ReturnType<typeof panel_creator>
+  ) {
+    const panel_status = read_panels_status(extensionAPI);
+    if (!panel_status) {
+      return;
+    } else if (typeof panel_status !== "object") {
+      return reset_panel_status(extensionAPI);
+    }
+
+    for (let id in panel_status) {
+      const panel = panel_status[id as keyof PanelState];
+      if (panel)
+        panel_factory(
+          { x: panel.position.left, y: panel.position.top },
+          panel.uid
+        )?.restore(panel);
+    }
+  }
 
   const on_mouse_in = (el: MouseEvent) => {
     const uid = getUidFromTarget(el.target as HTMLElement);
@@ -342,11 +402,15 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
   let on_jspanelstatuschange = function (event: any) {
     const panel = get_panel_from_target(event.panel);
     console.log("status change");
+    panel._manager?.pin();
+  };
+  let on_jspaneldragstop = function (event: any) {
+    const panel = get_panel_from_target(event.panel);
     panel._manager.pin();
   };
-
   document.addEventListener("jspanelbeforeclose", on_jspanelclosed, false);
   document.addEventListener("jspaneldragstart", on_jspaneldragstart, false);
+  document.addEventListener("jspaneldragstop", on_jspaneldragstop, false);
   document.addEventListener(
     "jspanelstatuschange",
     on_jspanelstatuschange,
@@ -366,6 +430,8 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
     });
   });
   const unsub_create_context = create_on_block_context_memu(panel_factory);
+  restore_panels(extensionAPI, panel_factory);
+
   return () => {
     routeSub();
     unsub_create_context();
@@ -386,6 +452,7 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
       on_jspaneldragstart,
       false
     );
+    document.removeEventListener("jspaneldragstop", on_jspaneldragstop, false);
   };
 }
 
