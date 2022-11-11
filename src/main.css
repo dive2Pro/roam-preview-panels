@@ -13,6 +13,10 @@
     flex: 0 0 0px;
 }
 
+.jsPanel .jsPanel-standard {
+    z-index: 0 !important;
+}
+
 .jsPanel .panel-title {
     width: 100%;
     text-overflow: ellipsis;
