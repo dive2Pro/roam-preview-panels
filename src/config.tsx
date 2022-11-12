@@ -6,6 +6,7 @@ const CONSTANTS = {
     "panel-height": "panel-height",
     sync: "sync",
     "panel-status": "panel-status",
+    delay: "delay",
   },
 };
 
@@ -56,10 +57,15 @@ export const save_panels_status_initial = (extensionAPI: RoamExtensionAPI) => {
       write_to_settings();
     },
     delete: (id: string) => {
+      json = read_panels_status(extensionAPI);
       delete json[id];
       write_to_settings();
     },
   };
+};
+
+export const read_delay_ms = (extensionAPI: RoamExtensionAPI) => {
+  return Math.max(extensionAPI.settings.get(CONSTANTS.id.delay), 0) || 300;
 };
 
 export function panel_create(extensionAPI: RoamExtensionAPI) {
@@ -96,6 +102,15 @@ export function panel_create(extensionAPI: RoamExtensionAPI) {
     tabTitle: "Preview Panels",
     settings: [
       {
+        id: CONSTANTS.id["delay"],
+        name: "Hover trigger delay(ms)",
+        description: "how long to wait before showing a panel",
+        action: {
+          type: "input",
+          placeholder: "200",
+        },
+      },
+      {
         id: CONSTANTS.id.sync,
         name: "Sync",
         description: "Sync opened panels status across browser",
@@ -111,10 +126,6 @@ export function panel_create(extensionAPI: RoamExtensionAPI) {
         action: {
           type: "input",
           placeholder: "400",
-          // onChange: (evt) => {
-          // console.log("Input Changed!", evt);
-
-          // },
         },
       },
       {

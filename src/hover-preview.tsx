@@ -3,6 +3,7 @@ import "jspanel4/es6module/jspanel.min.css";
 import "./main.css";
 import { PullBlock } from "roamjs-components/types";
 import {
+  read_delay_ms,
   read_panels_status,
   read_panel_size,
   reset_panel_status,
@@ -117,8 +118,6 @@ const get_panel_id = (uid: string) => "panel-" + uid;
 let id_increment = 0;
 
 const panel_creator = (extensionAPI: RoamExtensionAPI) => {
-  const DELAY_ms =
-    (extensionAPI.settings.get(CONFIG_KEYS.DELAY) as number) || 300;
   const panel_status_operator = save_panels_status_initial(extensionAPI);
   return (rect: { x: number; y: number }, uid: string) => {
     let panelInstance: Panel | undefined;
@@ -152,15 +151,15 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
         headerTitle: `<div class="panel-title">${get_block_title(block)}</div>`,
         position: adjust_panel_start_position(rect),
         panelSize: read_panel_size(extensionAPI, panel),
-        setStatus: panel?.status
+        setStatus: panel?.status,
       });
       if (panel) {
         panelInstance.currentData = {
-          height: panel.position.height + 'px',
-          top: panel.position.top + 'px',
-          left: panel.position.left + 'px',
-          width: panel.position.width + 'px',
-        }
+          height: panel.position.height + "px",
+          top: panel.position.top + "px",
+          left: panel.position.left + "px",
+          width: panel.position.width + "px",
+        };
       }
       await delay(10);
       panelInstance._manager = result;
@@ -191,6 +190,7 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
     };
 
     let createFn = () => {
+      const DELAY_ms = read_delay_ms(extensionAPI);
       let timeoutId = setTimeout(init, DELAY_ms);
       const origin_fn = destroyFn;
       destroyFn = () => {
@@ -256,10 +256,7 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
   };
 };
 
-const adjust_panel_start_position = (
-  rect: { x: number; y: number },
-) => {
-  
+const adjust_panel_start_position = (rect: { x: number; y: number }) => {
   const window_height = window.innerHeight;
   if (rect.y + 230 >= window_height) {
     return {
@@ -424,9 +421,7 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
       if (!panel._manager) {
         return;
       }
-      if (!panel._manager.is_pined()) {
-        panel.close();
-      }
+      panel._manager.destroy();
     });
   });
   const unsub_create_context = create_on_block_context_memu(panel_factory);
