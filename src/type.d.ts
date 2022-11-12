@@ -13,10 +13,10 @@ type PanelState = {
   uid: string;
   id: string;
   position: {
-    height: number;
-    width: number;
-    left: number;
-    top: number;
+    height: string;
+    width: string;
+    left: string;
+    top: string;
   };
   status: string;
 };

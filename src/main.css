@@ -12,9 +12,8 @@
     max-width: 10px;
     flex: 0 0 0px;
 }
-
-.jsPanel .jsPanel-standard {
-    z-index: 0 !important;
+.bp3-portal {
+    z-index: 999;
 }
 
 .jsPanel .panel-title {

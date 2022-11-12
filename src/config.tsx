@@ -38,22 +38,30 @@ export const reset_panel_status = (extensionAPI: RoamExtensionAPI) => {
   extensionAPI.settings.set(CONSTANTS.id["panel-status"], undefined);
 };
 
+function debounce_leading<T extends []>(
+  func: (...args: T) => void,
+  timeout = 300
+) {
+  let timer: any;
+  return (...args: T) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      timer = undefined;
+      func.apply(this, args);
+    }, timeout);
+  };
+}
 export const save_panels_status_initial = (extensionAPI: RoamExtensionAPI) => {
-  const write_to_settings = () => {
+  const write_to_settings = debounce_leading(async () => {
     const json = [...document.querySelectorAll(".jsPanel")].reduce(
       (p, panelInstance: Panel) => {
-        const { width, height, left, top } = panelInstance.currentData;
         p[panelInstance.id] = {
           id: panelInstance.id,
           uid: panelInstance.uid,
-          position: {
-            width: parseFloat(width),
-            height: parseFloat(height),
-            left: parseFloat(left),
-            top: parseFloat(top),
-          },
+          position: panelInstance.currentData,
           status: panelInstance.status,
         };
+        console.log(panelInstance.currentData, " ------ ");
         return p;
       },
       {} as Record<string, PanelState>
@@ -63,7 +71,7 @@ export const save_panels_status_initial = (extensionAPI: RoamExtensionAPI) => {
       CONSTANTS.id["panel-status"],
       JSON.stringify(json)
     );
-  };
+  }, 1000);
   return {
     save: () => {
       if (!extensionAPI.settings.get(CONSTANTS.id.sync)) {

@@ -149,23 +149,12 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
           }
         },
         headerTitle: `<div class="panel-title">${get_block_title(block)}</div>`,
-        position: adjust_panel_start_position(rect),
+        position: adjust_panel_start_position(rect, panel),
         panelSize: read_panel_size(extensionAPI, panel),
         setStatus: panel?.status,
       });
       if (panel) {
-        panelInstance.currentData = {
-          height: panel.position.height + "px",
-          top: panel.position.top + "px",
-          left: panel.position.left + "px",
-          width: panel.position.width + "px",
-        };
-        panelInstance.reposition({
-          my: "left-bottom",
-          at: "left-top",
-          offsetX: rect.x,
-          offsetY: rect.y,
-        });
+        panelInstance.currentData = panel.position;
       }
       await delay(10);
       panelInstance._manager = result;
@@ -250,7 +239,15 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
   };
 };
 
-const adjust_panel_start_position = (rect: { x: number; y: number }) => {
+const adjust_panel_start_position = (rect: { x: number; y: number }, panel?: PanelState) => {
+  if (panel) {
+    return {
+      my: "left-top",
+      at: "left-top",
+      offsetX: rect.x,
+      offsetY: rect.y,
+    };
+  }
   const window_height = window.innerHeight;
   if (rect.y + 230 >= window_height) {
     return {
@@ -325,7 +322,7 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
       const panel = panel_status[id as keyof PanelState];
       if (panel)
         panel_factory(
-          { x: panel.position.left, y: panel.position.top },
+          { x:   parseFloat(panel.position.left), y:  parseFloat(panel.position.top) },
           panel.uid
         )?.restore(panel);
     }
