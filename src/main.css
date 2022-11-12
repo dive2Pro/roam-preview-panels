@@ -2,9 +2,21 @@
   overflow: hidden;
 }
 
-.jsPanel-content .page > div:first-child {
-  margin-top: -30px;
-  margin-left: -30px;
+.jsPanel-content .page > div:first-child > .rm-block-main .roam-block {
+  /* margin-top: -30px; */
+  /* margin-left: -30px; */
+  position: relative;
+}
+
+.jsPanel-content .page > div > .rm-block-main:first-child .roam-block:after {
+  position: absolute;
+  top: 0;
+  content: "Useless block, leave it empty";
+  bottom: 0;
+  right: 0;
+  left: 0;
+  line-height: 30px;
+  color: #b9b8b8;
 }
 
 .jsPanel-content .page .rm-block-separator {
