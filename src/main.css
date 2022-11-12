@@ -1,5 +1,5 @@
-.jsPanel-content .page{
-    overflow: hidden;
+.jsPanel-content .page {
+  overflow: hidden;
 }
 
 .jsPanel-content .page > div:first-child {
@@ -8,33 +8,53 @@
 }
 
 .jsPanel-content .page .rm-block-separator {
-    min-width: 0px;
-    max-width: 10px;
-    flex: 0 0 0px;
+  min-width: 0px;
+  max-width: 10px;
+  flex: 0 0 0px;
 }
 .bp3-portal {
-    z-index: 999;
+  z-index: 999;
 }
 
 .jsPanel .panel-title {
-    width: 100%;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    font-variant-caps: initial;
+  width: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  font-variant-caps: initial;
 }
 
 .jsPanel-replacement {
-    /* max-width: 350px; */
-    width: unset;
-    /* overflow: hidden;
+  /* max-width: 350px; */
+  width: unset;
+  /* overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis; */
 }
 
 .jsPanel .empty-add {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor:pointer;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.jsPanel-content {
+  background: var(--bc-main, white);
+  color: var(--co-main, #000);
+}
+
+.jsPanel:after {
+  content: " ";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  box-shadow: inset -0.2px -0.2px 0px #6b6b6b, inset 0.2px 0px 0px #6b6b6b;
+  pointer-events: none;
+}
+
+.bp3-overlay-open .jsPanel {
+  z-index: 0 !important;
 }

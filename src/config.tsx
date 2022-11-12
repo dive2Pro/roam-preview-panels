@@ -136,7 +136,7 @@ export function panel_create(extensionAPI: RoamExtensionAPI) {
           }}
           options={[
             {
-              label: "",
+              label: "-",
               value: undefined,
             },
             {

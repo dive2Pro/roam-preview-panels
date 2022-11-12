@@ -11,6 +11,8 @@ hover over a page or block reference and preview editable contents of that page 
 - You can set the default size of the panel
 - You can specify a modifier key so that the panel only appears when you press and hold the modifier key.
 - The state of the panel is automatically saved, and restored after you refresh the page or change browsers, 
+- The theme of the panel is now fitted to the  [Roam-Studio](https://github.com/rcvd/RoamStudio)
+
 
 # demo
 
