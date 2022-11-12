@@ -70,3 +70,7 @@
 .bp3-overlay-open .jsPanel {
   z-index: 0 !important;
 }
+
+.rm-autocomplete__results {
+  z-index: 200;
+}
