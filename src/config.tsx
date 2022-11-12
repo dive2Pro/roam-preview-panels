@@ -61,7 +61,6 @@ export const save_panels_status_initial = (extensionAPI: RoamExtensionAPI) => {
           position: panelInstance.currentData,
           status: panelInstance.status,
         };
-        console.log(panelInstance.currentData, " ------ ");
         return p;
       },
       {} as Record<string, PanelState>
@@ -134,15 +133,6 @@ export function panel_create(extensionAPI: RoamExtensionAPI) {
         },
       },
       {
-        id: CONSTANTS.id.sync,
-        name: "Sync",
-        description: "Sync opened panels status across browser",
-        action: {
-          type: "switch",
-          defaultValue: true,
-        },
-      },
-      {
         id: CONSTANTS.id["panel-width"],
         name: "Initial panel width",
         description: "entry any valid positive number",
@@ -161,6 +151,14 @@ export function panel_create(extensionAPI: RoamExtensionAPI) {
         },
       },
       {
+        id: CONSTANTS.id.sync,
+        name: "Save",
+        description: "Save the status of panels",
+        action: {
+          type: "switch",
+        },
+      },
+      {
         id: "check-panel-status",
         name: "check panels status",
         action: { type: "reactComponent", component: PanelStatusContent },
@@ -169,4 +167,8 @@ export function panel_create(extensionAPI: RoamExtensionAPI) {
   };
 
   extensionAPI.settings.panel.create(panel_config);
+  extensionAPI.settings.set(
+    CONSTANTS.id.sync,
+    extensionAPI.settings.get(CONSTANTS.id.sync) ?? true
+  );
 }
