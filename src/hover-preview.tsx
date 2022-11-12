@@ -4,6 +4,7 @@ import "./main.css";
 import { PullBlock } from "roamjs-components/types";
 import {
   read_delay_ms,
+  read_modifier,
   read_panels_status,
   read_panel_size,
   reset_panel_status,
@@ -239,7 +240,10 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
   };
 };
 
-const adjust_panel_start_position = (rect: { x: number; y: number }, panel?: PanelState) => {
+const adjust_panel_start_position = (
+  rect: { x: number; y: number },
+  panel?: PanelState
+) => {
   if (panel) {
     return {
       my: "left-top",
@@ -322,7 +326,10 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
       const panel = panel_status[id as keyof PanelState];
       if (panel)
         panel_factory(
-          { x:   parseFloat(panel.position.left), y:  parseFloat(panel.position.top) },
+          {
+            x: parseFloat(panel.position.left),
+            y: parseFloat(panel.position.top),
+          },
           panel.uid
         )?.restore(panel);
     }
@@ -334,6 +341,12 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
       let panel = panels_map.get(get_panel_id(uid));
       // console.log(panel, " = create", id_increment);
       if (!panel) {
+        const modifier = read_modifier(extensionAPI);
+        if (modifier) {
+          if (!el[modifier]) {
+            return;
+          }
+        }
         const rect = (el.target as HTMLElement).getBoundingClientRect();
         panel = panel_factory(
           {
@@ -342,8 +355,10 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
           },
           uid
         );
-        panel.create();
-        panels_map.set(get_panel_id(uid), panel);
+        if (panel) {
+          panel.create();
+          panels_map.set(get_panel_id(uid), panel);
+        }
       } else {
         panel.keep();
       }
