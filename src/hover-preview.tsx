@@ -160,9 +160,16 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
           left: panel.position.left + "px",
           width: panel.position.width + "px",
         };
+        panelInstance.reposition({
+          my: "left-bottom",
+          at: "left-top",
+          offsetX: rect.x,
+          offsetY: rect.y,
+        });
       }
       await delay(10);
       panelInstance._manager = result;
+      panelInstance.uid = uid;
       id_increment++;
 
       render_roam_block_on(panelId, uid);
@@ -186,12 +193,11 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
         panelInstance.close();
       }
       panels_map.delete(get_panel_id(uid));
-      panel_status_operator.delete(panelInstance.id);
+      panel_status_operator.delete();
     };
 
-    let createFn = () => {
-      const DELAY_ms = read_delay_ms(extensionAPI);
-      let timeoutId = setTimeout(init, DELAY_ms);
+    let createFn = (delay: number) => {
+      let timeoutId = setTimeout(init, delay);
       const origin_fn = destroyFn;
       destroyFn = () => {
         clearInterval(timeoutId);
@@ -206,8 +212,10 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
     };
     let timeout_id_for_remove_by_moveout_of_uid_target: any;
     const result: PanelManager = {
-      create() {
-        return createFn();
+      create(delay?: number) {
+        const DELAY_ms = read_delay_ms(extensionAPI);
+
+        return createFn(delay || DELAY_ms);
       },
       destroy() {
         timeout_id_for_remove_by_moveout_of_uid_target = setTimeout(() => {
@@ -224,22 +232,8 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
           id_increment++;
           panels_map.delete(get_panel_id(uid));
         }
-        if (!panelInstance) {
-          return;
-        }
         // save panels status
-        const { width, height, left, top } = panelInstance.currentData;
-        panel_status_operator.save({
-          uid,
-          id: panelInstance.id,
-          position: {
-            width: parseFloat(width),
-            height: parseFloat(height),
-            left: parseFloat(left),
-            top: parseFloat(top),
-          },
-          status: panelInstance.status,
-        });
+        panel_status_operator.save();
       },
       unpin() {
         pin = false;
@@ -289,7 +283,7 @@ function create_on_block_context_memu(
     callback: (e) => {
       e["block-uid"];
       const panel = panel_factory(block_memu_position, e["block-uid"]);
-      panel.create();
+      panel.create(10);
       panel.pin();
     },
   });

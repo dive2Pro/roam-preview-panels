@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@blueprintjs/core";
+import { Panel } from "jspanel4";
 const CONSTANTS = {
   id: {
     "panel-width": "panel-width",
@@ -38,34 +39,48 @@ export const reset_panel_status = (extensionAPI: RoamExtensionAPI) => {
 };
 
 export const save_panels_status_initial = (extensionAPI: RoamExtensionAPI) => {
-  let json = read_panels_status(extensionAPI);
-
   const write_to_settings = () => {
+    const json = [...document.querySelectorAll(".jsPanel")].reduce(
+      (p, panelInstance: Panel) => {
+        const { width, height, left, top } = panelInstance.currentData;
+        p[panelInstance.id] = {
+          id: panelInstance.id,
+          uid: panelInstance.uid,
+          position: {
+            width: parseFloat(width),
+            height: parseFloat(height),
+            left: parseFloat(left),
+            top: parseFloat(top),
+          },
+          status: panelInstance.status,
+        };
+        return p;
+      },
+      {} as Record<string, PanelState>
+    );
+
     extensionAPI.settings.set(
       CONSTANTS.id["panel-status"],
       JSON.stringify(json)
     );
   };
   return {
-    save: (config: PanelState) => {
+    save: () => {
       if (!extensionAPI.settings.get(CONSTANTS.id.sync)) {
         return;
       }
-      json = read_panels_status(extensionAPI);
-      // console.log(config, " = config", read_panels_status(extensionAPI));
-      json[config.id] = config;
       write_to_settings();
     },
-    delete: (id: string) => {
-      json = read_panels_status(extensionAPI);
-      delete json[id];
+    delete: () => {
       write_to_settings();
     },
   };
 };
 
 export const read_delay_ms = (extensionAPI: RoamExtensionAPI) => {
-  return Math.max(extensionAPI.settings.get(CONSTANTS.id.delay), 0) || 300;
+  return (
+    Math.max(extensionAPI.settings.get(CONSTANTS.id.delay) as number, 0) || 300
+  );
 };
 
 export function panel_create(extensionAPI: RoamExtensionAPI) {
