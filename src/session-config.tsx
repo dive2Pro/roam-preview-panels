@@ -28,9 +28,10 @@ const use_forceupdate = () => {
 const read_sessions = (extensionAPI: RoamExtensionAPI): PanelSessions => {
   const sessions = extensionAPI.settings.get(
     CONSTANTS.id["panel-sessions"]
-  ) as PanelSessions;
+  ) as string;
   try {
-    return sessions || [];
+    console.log(sessions, ' = sessions')
+    return JSON.parse(sessions) || [];
   } catch (e) {
     return [];
   }
@@ -55,7 +56,7 @@ const save_current_session_by_title = (
     title,
     state: json,
   });
-  extensionAPI.settings.set(CONSTANTS.id["panel-sessions"], sessions);
+  extensionAPI.settings.set(CONSTANTS.id["panel-sessions"], JSON.stringify(sessions));
 };
 
 const change_session_title = (

@@ -312,6 +312,21 @@ function create_on_block_context_memu(
 export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
   const panel_factory = panel_creator(extensionAPI);
 
+  function create_panels_from_panelsession(
+    session: Record<string, PanelState>
+  ) {
+    for (let id in session) {
+      const panel = session[id as keyof PanelState];
+      if (panel)
+        panel_factory(
+          {
+            x: parseFloat(panel.position.left),
+            y: parseFloat(panel.position.top),
+          },
+          panel.uid
+        )?.restore(panel);
+    }
+  }
   function restore_panels(
     extensionAPI: RoamExtensionAPI,
     panel_factory: ReturnType<typeof panel_creator>
@@ -322,18 +337,7 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
     } else if (typeof panel_status !== "object") {
       return reset_panel_status(extensionAPI);
     }
-
-    for (let id in panel_status) {
-      const panel = panel_status[id as keyof PanelState];
-      if (panel)
-        panel_factory(
-          {
-            x: parseFloat(panel.position.left),
-            y: parseFloat(panel.position.top),
-          },
-          panel.uid
-        )?.restore(panel);
-    }
+    create_panels_from_panelsession(panel_status);
   }
 
   const on_mouse_in = (el: MouseEvent) => {
@@ -433,15 +437,17 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
   });
   const unsub_create_context = create_on_block_context_memu(panel_factory);
   restore_panels(extensionAPI, panel_factory);
-  
+
   const unsub_panel_selected = CONSTANTS.event.action.listen(
     "panel-session-selected",
     (session) => {
-      console.log(session, ' = session ')
       // clean all current panels
-      
+      [...document.querySelectorAll(".jsPanel")].forEach((panel) => {
+        (panel as Panel)._manager?.unpin();
+        (panel as Panel)._manager?.destroy();
+      });
       // add new panels;
-
+      create_panels_from_panelsession(session.state);
     }
   );
 
