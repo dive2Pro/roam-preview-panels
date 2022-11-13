@@ -319,7 +319,7 @@ export function session_init(extensionAPI: RoamExtensionAPI) {
     return (
       <Callout style={{ flex: 1000 }}>
         <div style={{ display: "flex", flexDirection: "row" }}>
-          <h4 style={{ flex: 1 }}>Panel Sessions</h4>
+          <h2 style={{ flex: 1 }}>Panel Sessions</h2>
 
           <Button
             icon="refresh"

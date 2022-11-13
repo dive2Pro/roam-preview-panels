@@ -191,17 +191,17 @@ export function panel_config_create(extensionAPI: RoamExtensionAPI) {
           placeholder: "200",
         },
       },
-      // {
-      //   id: CONSTANTS.id.sync,
-      //   name: "Save",
-      //   description: "Save the status of panels",
-      //   action: {
-      //     type: "switch",
-      //   },
-      // },
+      {
+        id: CONSTANTS.id.sync,
+        name: "Save",
+        description: "Save the status of the active panels",
+        action: {
+          type: "switch",
+        },
+      },
       {
         id: "check-panel-status",
-        name: "Check panels status",
+        name: "Check the status of the active panels",
         action: { type: "reactComponent", component: PanelStatusContent },
       },
       session_config.config,
