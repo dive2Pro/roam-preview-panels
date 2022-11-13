@@ -1,6 +1,7 @@
 import {
   Alert,
   Button,
+  Callout,
   Classes,
   Dialog,
   EditableText,
@@ -30,7 +31,7 @@ const read_sessions = (extensionAPI: RoamExtensionAPI): PanelSessions => {
     CONSTANTS.id["panel-sessions"]
   ) as string;
   try {
-    console.log(sessions, ' = sessions')
+    // console.log(sessions, ' = sessions')
     return JSON.parse(sessions) || [];
   } catch (e) {
     return [];
@@ -41,7 +42,6 @@ const save_current_session_by_title = (
   extensionAPI: RoamExtensionAPI,
   title: string
 ) => {
-  console.log("save session title:", title);
   const sessions = read_sessions(extensionAPI);
   const json = get_current_panel_injson();
   if (!json) {
@@ -56,15 +56,33 @@ const save_current_session_by_title = (
     title,
     state: json,
   });
-  extensionAPI.settings.set(CONSTANTS.id["panel-sessions"], JSON.stringify(sessions));
+  save_sessions(extensionAPI, sessions);
 };
 
 const change_session_title = (
   extensionAPI: RoamExtensionAPI,
-  newTitle: string
-) => {};
+  newTitle: string,
+  index: number
+) => {
+  const sessions = read_sessions(extensionAPI);
+  sessions[index].title = newTitle;
+  save_sessions(extensionAPI, sessions);
+};
 
-const delete_session = (extensionAPI: RoamExtensionAPI, newTitle: string) => {};
+const save_sessions = (
+  extensionAPI: RoamExtensionAPI,
+  sessions: PanelSessions
+) => {
+  extensionAPI.settings.set(
+    CONSTANTS.id["panel-sessions"],
+    JSON.stringify(sessions)
+  );
+};
+const delete_session = (extensionAPI: RoamExtensionAPI, index: number) => {
+  const sessions = read_sessions(extensionAPI);
+  sessions.splice(index, 1);
+  save_sessions(extensionAPI, sessions);
+};
 
 const create_topbar_menu = (extensionAPI: RoamExtensionAPI) => {
   const topbar = document.querySelector(".rm-topbar");
@@ -107,8 +125,7 @@ const create_topbar_menu = (extensionAPI: RoamExtensionAPI) => {
           <div className={Classes.DIALOG_BODY}>
             <InputGroup
               autoFocus
-              placeholder="title..."
-              color=""
+              placeholder="session name..."
               onChange={(e) => {
                 setState({
                   ...state,
@@ -188,41 +205,108 @@ const create_topbar_menu = (extensionAPI: RoamExtensionAPI) => {
 };
 
 export function session_init(extensionAPI: RoamExtensionAPI) {
+  function PanelSessionItem({
+    session,
+    onChange,
+    index,
+  }: {
+    session: PanelSession;
+    index: number;
+    onChange: () => void;
+  }) {
+    const [state, setState] = useState({ value: session.title });
+    const changed = state.value !== session.title;
+    return (
+      <section style={{ display: "flex", flexDirection: "row" }}>
+        <InputGroup
+          style={{
+            minWidth: 400,
+          }}
+          defaultValue={session.title}
+          value={state.value}
+          onChange={(e) =>
+            setState({
+              value: e.target.value,
+            })
+          }
+        ></InputGroup>
+        <div style={{ flex: 1 }}></div>
+        {changed ? (
+          <>
+            <Tooltip content={"Confirm Change"}>
+              <Button
+                onClick={() => {
+                  change_session_title(extensionAPI, state.value, index);
+                  onChange();
+                }}
+                minimal
+                small
+                icon="confirm"
+              ></Button>
+            </Tooltip>
+            <Tooltip content={"Cancel Change"}>
+              <Button
+                minimal
+                small
+                icon="undo"
+                onClick={() => {
+                  setState({
+                    value: session.title,
+                  });
+                }}
+              ></Button>
+            </Tooltip>
+          </>
+        ) : null}
+        <Button
+          minimal
+          intent="danger"
+          icon="delete"
+          onClick={() => {
+            delete_session(extensionAPI, index);
+            onChange();
+          }}
+        />
+      </section>
+    );
+  }
   function PanelSessions() {
     const sessions = read_sessions(extensionAPI);
     const force_updater = use_forceupdate();
     return (
-      <div>
-        <Button
-          icon="refresh"
-          minimal
-          onClick={() => {
-            force_updater();
-          }}
-        />
-        <div>
-          {sessions.map((session) => {
+      <Callout style={{ flex: 1000 }}>
+        <div style={{ display: "flex", flexDirection: "row" }}>
+          <h4 style={{ flex: 1 }}>Panel Sessions</h4>
+
+          <Button
+            icon="refresh"
+            minimal
+            onClick={() => {
+              force_updater();
+            }}
+          />
+        </div>
+
+        <div style={{ maxHeight: 150, overflow: "auto" }}>
+          {sessions.map((session, index) => {
             return (
-              <section>
-                <Button minimal icon="edit" onClick={() => {}} />
-                <Button
-                  minimal
-                  intent="danger"
-                  icon="delete"
-                  onClick={() => {}}
-                />
-              </section>
+              <PanelSessionItem
+                session={session}
+                index={index}
+                onChange={() => {
+                  force_updater();
+                }}
+              />
             );
           })}
         </div>
-      </div>
+      </Callout>
     );
   }
   const remove_topbar_menu = create_topbar_menu(extensionAPI);
   return {
     config: {
       id: "panel-sessions-operator",
-      name: "Panel Sessions",
       action: {
         type: "reactComponent",
         component: PanelSessions,

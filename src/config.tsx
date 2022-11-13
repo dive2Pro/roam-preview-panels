@@ -199,11 +199,11 @@ export function panel_config_create(extensionAPI: RoamExtensionAPI) {
       //     type: "switch",
       //   },
       // },
-      // {
-      //   id: "check-panel-status",
-      //   name: "Check panels status",
-      //   action: { type: "reactComponent", component: PanelStatusContent },
-      // },
+      {
+        id: "check-panel-status",
+        name: "Check panels status",
+        action: { type: "reactComponent", component: PanelStatusContent },
+      },
       session_config.config,
     ],
   };
