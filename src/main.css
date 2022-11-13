@@ -75,3 +75,8 @@
 .rm-autocomplete__results {
   z-index: 200;
 }
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}

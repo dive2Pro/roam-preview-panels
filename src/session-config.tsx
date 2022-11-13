@@ -37,6 +37,23 @@ const read_sessions = (extensionAPI: RoamExtensionAPI): PanelSessions => {
     return [];
   }
 };
+export const save_current_session_by_index = (
+  extensionAPI: RoamExtensionAPI,
+  index: number
+) => {
+  const sessions = read_sessions(extensionAPI);
+  const json = get_current_panel_injson();
+  if (!json) {
+    Toaster.create().show({
+      message: "No panels found",
+      intent: "warning",
+      icon: "hand",
+    });
+    return;
+  }
+  sessions[index].state = json;
+  save_sessions(extensionAPI, sessions);
+};
 
 const save_current_session_by_title = (
   extensionAPI: RoamExtensionAPI,
@@ -123,23 +140,24 @@ const create_topbar_menu = (extensionAPI: RoamExtensionAPI) => {
           isCloseButtonShown={false}
         >
           <div className={Classes.DIALOG_BODY}>
-            <InputGroup
-              autoFocus
-              placeholder="session name..."
-              onChange={(e) => {
-                setState({
-                  ...state,
-                  text: e.target.value,
-                });
-              }}
-            />
-          </div>
-          <div className={Classes.DIALOG_FOOTER}>
-            <div className={Classes.DIALOG_FOOTER_ACTIONS}>
+            <div className="flex-row">
+              <div style={{ flex: 1, marginRight: 10 }}>
+                <InputGroup
+                  autoFocus
+                  placeholder="session name..."
+                  onChange={(e) => {
+                    setState({
+                      ...state,
+                      text: e.target.value,
+                    });
+                  }}
+                />
+              </div>
+
               <Button
                 disabled={!state.text}
                 intent="primary"
-                text="Okey"
+                text="Create"
                 onClick={async () => {
                   save_current_session_by_title(extensionAPI, state.text);
 
@@ -150,6 +168,31 @@ const create_topbar_menu = (extensionAPI: RoamExtensionAPI) => {
                 }}
               />
             </div>
+
+            {state.sessions.length ? (
+              <div>
+                <h4>Override to</h4>
+                <Menu>
+                  {state.sessions.map((session, index) => {
+                    return (
+                      <MenuItem
+                        onClick={() => {
+                          save_current_session_by_index(extensionAPI, index);
+                          setState({
+                            ...state,
+                            is_open: false,
+                          });
+                        }}
+                        text={session.title}
+                      ></MenuItem>
+                    );
+                  })}
+                </Menu>
+              </div>
+            ) : null}
+          </div>
+          <div className={Classes.DIALOG_FOOTER}>
+            <div className={Classes.DIALOG_FOOTER_ACTIONS}></div>
           </div>
         </Dialog>
         <Popover
@@ -163,7 +206,7 @@ const create_topbar_menu = (extensionAPI: RoamExtensionAPI) => {
             <Menu>
               <MenuItem
                 tagName="span"
-                text="Save Session"
+                text="Save Session as"
                 icon="add"
                 onClick={() => {
                   setState({
