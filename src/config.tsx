@@ -1,16 +1,8 @@
 import { useState } from "react";
-import { Button, HTMLSelect, Menu } from "@blueprintjs/core";
-import { Panel } from "jspanel4";
-const CONSTANTS = {
-  id: {
-    "panel-width": "panel-width",
-    "panel-height": "panel-height",
-    sync: "sync",
-    "panel-status": "panel-status",
-    delay: "delay",
-    modifier: "modifier",
-  },
-};
+import { Button, EditableText, HTMLSelect, Menu } from "@blueprintjs/core";
+import { CONSTANTS } from "./constants";
+import { session_init } from "./session-config";
+import { get_current_panel_injson } from "./panel-status";
 
 export const read_panel_size = (
   extensionAPI: RoamExtensionAPI,
@@ -24,6 +16,10 @@ export const read_panel_size = (
   } `;
 };
 
+/**
+ * read active panels status
+ * @returns 
+ */
 export const read_panels_status = (extensionAPI: RoamExtensionAPI) => {
   const result = extensionAPI.settings.get(CONSTANTS.id["panel-status"]) as
     | string
@@ -54,23 +50,12 @@ function debounce_leading<T extends []>(
 }
 export const save_panels_status_initial = (extensionAPI: RoamExtensionAPI) => {
   const write_to_settings = debounce_leading(async () => {
-    const json = [...document.querySelectorAll(".jsPanel")].reduce(
-      (p, panelInstance: Panel) => {
-        p[panelInstance.id] = {
-          id: panelInstance.id,
-          uid: panelInstance.uid,
-          position: panelInstance.currentData,
-          status: panelInstance.status,
-        };
-        return p;
-      },
-      {} as Record<string, PanelState>
-    );
-
-    extensionAPI.settings.set(
-      CONSTANTS.id["panel-status"],
-      JSON.stringify(json)
-    );
+    const json = get_current_panel_injson();
+    if (json)
+      extensionAPI.settings.set(
+        CONSTANTS.id["panel-status"],
+        JSON.stringify(json)
+      );
   }, 1000);
   return {
     save: () => {
@@ -96,7 +81,7 @@ export const read_modifier = (extensionAPI: RoamExtensionAPI) => {
     | undefined;
 };
 
-export function panel_create(extensionAPI: RoamExtensionAPI) {
+export function panel_config_create(extensionAPI: RoamExtensionAPI) {
   function PanelStatusContent() {
     const [state, setState] = useState({});
     return (
@@ -164,6 +149,8 @@ export function panel_create(extensionAPI: RoamExtensionAPI) {
       </div>
     );
   }
+
+  const session_config = session_init(extensionAPI);
   const panel_config = {
     tabTitle: "Preview Panels",
     settings: [
@@ -204,19 +191,20 @@ export function panel_create(extensionAPI: RoamExtensionAPI) {
           placeholder: "200",
         },
       },
-      {
-        id: CONSTANTS.id.sync,
-        name: "Save",
-        description: "Save the status of panels",
-        action: {
-          type: "switch",
-        },
-      },
-      {
-        id: "check-panel-status",
-        name: "check panels status",
-        action: { type: "reactComponent", component: PanelStatusContent },
-      },
+      // {
+      //   id: CONSTANTS.id.sync,
+      //   name: "Save",
+      //   description: "Save the status of panels",
+      //   action: {
+      //     type: "switch",
+      //   },
+      // },
+      // {
+      //   id: "check-panel-status",
+      //   name: "Check panels status",
+      //   action: { type: "reactComponent", component: PanelStatusContent },
+      // },
+      session_config.config,
     ],
   };
 
@@ -225,4 +213,8 @@ export function panel_create(extensionAPI: RoamExtensionAPI) {
     CONSTANTS.id.sync,
     extensionAPI.settings.get(CONSTANTS.id.sync) ?? true
   );
+
+  return () => {
+    session_config.uninstall();
+  };
 }

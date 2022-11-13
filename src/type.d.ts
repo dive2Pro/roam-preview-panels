@@ -21,6 +21,13 @@ type PanelState = {
   status: string;
 };
 
+type PanelSession = {
+  title: string,
+  state: Record<string, PanelState>
+}
+
+type PanelSessions = PanelSession[];
+
 type PanelManager = {
   create(ms?: number): void;
   destroy(): void;
@@ -56,4 +63,8 @@ declare module "jspanel4" {
   export const jsPanel = {
     create(obj: object): Panel;,
   };
+}
+
+namespace PanelEvent {
+  type PanelSessionSelected = "panel-session-selected";
 }

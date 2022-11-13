@@ -10,6 +10,7 @@ import {
   reset_panel_status,
   save_panels_status_initial,
 } from "./config";
+import { CONSTANTS } from "./constants";
 const ATTRIBUTE_PAGE = "data-link-uid";
 const ATTRIBUTE_BLOCK = "data-uid";
 const ATTRIBUTE_TAG = "data-tag";
@@ -432,8 +433,20 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
   });
   const unsub_create_context = create_on_block_context_memu(panel_factory);
   restore_panels(extensionAPI, panel_factory);
+  
+  const unsub_panel_selected = CONSTANTS.event.action.listen(
+    "panel-session-selected",
+    (session) => {
+      console.log(session, ' = session ')
+      // clean all current panels
+      
+      // add new panels;
+
+    }
+  );
 
   return () => {
+    unsub_panel_selected();
     routeSub();
     unsub_create_context();
     window.removeEventListener("mouseover", on_mouse_in);

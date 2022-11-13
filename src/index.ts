@@ -1,12 +1,13 @@
-import { panel_create } from "./config";
+import { panel_config_create } from "./config";
 import { hoverPreviewInit } from "./hover-preview";
 
 let initial = (extensionAPI: RoamExtensionAPI) => {
-  panel_create(extensionAPI);
+  const config_clean = panel_config_create(extensionAPI);
   const hoverPreviewUnload = hoverPreviewInit(extensionAPI);
 
   return () => {
     hoverPreviewUnload();
+    config_clean()
   };
 };
 
