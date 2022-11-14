@@ -18,7 +18,7 @@ export const read_panel_size = (
 
 /**
  * read active panels status
- * @returns 
+ * @returns
  */
 export const read_panels_status = (extensionAPI: RoamExtensionAPI) => {
   const result = extensionAPI.settings.get(CONSTANTS.id["panel-status"]) as
@@ -51,11 +51,11 @@ function debounce_leading<T extends []>(
 export const save_panels_status_initial = (extensionAPI: RoamExtensionAPI) => {
   const write_to_settings = debounce_leading(async () => {
     const json = get_current_panel_injson();
-    if (json)
-      extensionAPI.settings.set(
-        CONSTANTS.id["panel-status"],
-        JSON.stringify(json)
-      );
+
+    extensionAPI.settings.set(
+      CONSTANTS.id["panel-status"],
+      json ? JSON.stringify(json) : ""
+    );
   }, 1000);
   return {
     save: () => {
