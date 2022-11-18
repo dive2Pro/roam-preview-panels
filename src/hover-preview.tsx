@@ -462,11 +462,7 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
       on_jspaneldragstart,
       false
     );
-    document.removeEventListener(
-      "jspanelbeforeclose",
-      on_jspaneldragstart,
-      false
-    );
+    document.removeEventListener("jspanelbeforeclose", on_jspanelclosed, false);
     document.removeEventListener(
       "jspanelstatuschange",
       on_jspanelstatuschange,

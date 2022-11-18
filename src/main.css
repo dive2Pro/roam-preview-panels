@@ -1,7 +1,9 @@
 .jsPanel-content .page {
   overflow: hidden;
 }
-
+.jsPanel {
+  background-color: inherit !important;
+}
 .jsPanel-content .page > div:first-child > .rm-block-main .roam-block {
   /* margin-top: -30px; */
   /* margin-left: -30px; */
@@ -53,8 +55,8 @@
 }
 
 .jsPanel-content {
-  background: var(--bc-main, white);
-  color: var(--co-main, #000);
+  background: var(--bc-main, inherit);
+  color: var(--co-main, inherit);
 }
 
 .jsPanel:after {
