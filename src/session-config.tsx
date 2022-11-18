@@ -260,10 +260,11 @@ export function session_init(extensionAPI: RoamExtensionAPI) {
     const [state, setState] = useState({ value: session.title });
     const changed = state.value !== session.title;
     return (
-      <section style={{ display: "flex", flexDirection: "row" }}>
+      <section className="flex-row">
         <InputGroup
           style={{
             minWidth: 400,
+            color: "inherit",
           }}
           defaultValue={session.title}
           value={state.value}
@@ -274,42 +275,44 @@ export function session_init(extensionAPI: RoamExtensionAPI) {
           }
         ></InputGroup>
         <div style={{ flex: 1 }}></div>
-        {changed ? (
-          <>
-            <Tooltip content={"Confirm Change"}>
-              <Button
-                onClick={() => {
-                  change_session_title(extensionAPI, state.value, index);
-                  onChange();
-                }}
-                minimal
-                small
-                icon="confirm"
-              ></Button>
-            </Tooltip>
-            <Tooltip content={"Cancel Change"}>
-              <Button
-                minimal
-                small
-                icon="undo"
-                onClick={() => {
-                  setState({
-                    value: session.title,
-                  });
-                }}
-              ></Button>
-            </Tooltip>
-          </>
-        ) : null}
-        <Button
-          minimal
-          intent="danger"
-          icon="delete"
-          onClick={() => {
-            delete_session(extensionAPI, index);
-            onChange();
-          }}
-        />
+        <Tooltip disabled={!changed} content={"Confirm Change"}>
+          <Button
+            disabled={!changed}
+            onClick={() => {
+              change_session_title(extensionAPI, state.value, index);
+              onChange();
+            }}
+            minimal
+            small
+            icon="tick"
+            intent="success"
+          ></Button>
+        </Tooltip>
+        <Tooltip disabled={!changed} content={"Cancel Change"}>
+          <Button
+            minimal
+            disabled={!changed}
+            small
+            icon="reset"
+            onClick={() => {
+              setState({
+                value: session.title,
+              });
+            }}
+          ></Button>
+        </Tooltip>
+        <Tooltip content={"Delete Session"}>
+          <Button
+            minimal
+            small
+            intent="danger"
+            icon="delete"
+            onClick={() => {
+              delete_session(extensionAPI, index);
+              onChange();
+            }}
+          />
+        </Tooltip>
       </section>
     );
   }
@@ -324,6 +327,9 @@ export function session_init(extensionAPI: RoamExtensionAPI) {
           <Button
             icon="refresh"
             minimal
+            style={{
+              alignSelf: "center",
+            }}
             onClick={() => {
               force_updater();
             }}
