@@ -362,7 +362,7 @@ export function session_init(extensionAPI: RoamExtensionAPI) {
       },
     },
     uninstall() {
-      remove_topbar_menu();
+      remove_topbar_menu?.();
     },
   };
 }

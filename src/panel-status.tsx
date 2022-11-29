@@ -11,6 +11,7 @@ export const get_current_panel_injson = () => {
       uid: panelInstance.uid,
       position: panelInstance.currentData,
       status: panelInstance.status,
+      theme: panelInstance.options.theme
     };
     return p;
   }, {} as Record<string, PanelState>);

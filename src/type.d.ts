@@ -19,12 +19,13 @@ type PanelState = {
     top: string;
   };
   status: string;
+  theme: string;
 };
 
 type PanelSession = {
-  title: string,
-  state: Record<string, PanelState>
-}
+  title: string;
+  state: Record<string, PanelState>;
+};
 
 type PanelSessions = PanelSession[];
 
@@ -59,6 +60,11 @@ declare module "jspanel4" {
       my: string,
       at: string,
     }): void;
+    options: {
+      theme: string;
+    };
+    setTheme(theme: string): void;
+    addControl(config: { afterInsert: (control: HTMLElement) => void, html: string, name: string, position: number }): void;
   } & HTMLDivElement;
   export const jsPanel = {
     create(obj: object): Panel;,

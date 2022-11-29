@@ -13,7 +13,7 @@
 .jsPanel-content .page > div > .rm-block-main:first-child .roam-block:after {
   position: absolute;
   top: 0;
-  content: "Page's \"block\", better leave it empty";
+  content: 'Page\'s "block", better leave it empty';
   bottom: 0;
   right: 0;
   left: 0;
@@ -39,11 +39,13 @@
 }
 
 .jsPanel-replacement {
-  /* max-width: 350px; */
   width: unset;
-  /* overflow: hidden;
+}
+.jsPanel-replacement .jsPanel-titlebar .panel-title{
+    max-width: 500px;
+    overflow: hidden;
     white-space: nowrap;
-    text-overflow: ellipsis; */
+    text-overflow: ellipsis;
 }
 
 .jsPanel .empty-add {
@@ -81,4 +83,11 @@
 .flex-row {
   display: flex;
   flex-direction: row;
+}
+
+
+.jsPanel-btn-palette svg {
+  position: relative;
+    right: 5px;
+    top: -4px;
 }
