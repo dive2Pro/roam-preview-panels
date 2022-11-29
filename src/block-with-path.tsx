@@ -66,14 +66,13 @@ export function BreadcrumbsBlock(props: { uid: string }) {
             e.preventDefault();
             e.stopPropagation();
             setUid(tuid);
-            setTimeout(() => {
-              const portal = document
-                .querySelector(".rm-bullet__tooltip")
-                ?.closest(".bp3-portal");
-              portal?.parentElement?.removeChild(portal);
-            }, 1000);
           }
-
+          setTimeout(() => {
+            const portal = document
+              .querySelector(".rm-bullet__tooltip")
+              ?.closest(".bp3-portal");
+            portal?.parentElement?.removeChild(portal);
+          }, 1000);
           return true;
         }
       }}
@@ -98,9 +97,7 @@ export function BreadcrumbsBlock(props: { uid: string }) {
         }
       }}
     >
-      <div
-        className="block-breadcrumbs"
-      >
+      <div className="block-breadcrumbs">
         {parents.map((block, index, ary) => {
           const s = block[":block/string"] || block[":node/title"];
           return (
