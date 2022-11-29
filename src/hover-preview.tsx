@@ -1,4 +1,5 @@
 import { jsPanel, Panel } from "jspanel4";
+import ReactDOM from 'react-dom';
 import "jspanel4/es6module/jspanel.min.css";
 import "./main.css";
 import { PullBlock } from "roamjs-components/types";
@@ -11,6 +12,7 @@ import {
   save_panels_status_initial,
 } from "./config";
 import { CONSTANTS } from "./constants";
+import { BreadcrumbsBlock } from "./block-with-path";
 const ATTRIBUTE_PAGE = "data-link-uid";
 const ATTRIBUTE_BLOCK = "data-uid";
 const ATTRIBUTE_TAG = "data-tag";
@@ -89,11 +91,12 @@ const render_roam_block_on = (panelId: string, uid: string) => {
   if (!el) {
     return;
   }
-  // 检查页面是否是空的, 如果是, 则新建一个"点击"创建的蒙层
-  window.roamAlphaAPI.ui.components.renderBlock({
-    uid,
-    el: el as HTMLElement,
-  });
+  ReactDOM.render(<BreadcrumbsBlock uid={uid} />, el);
+  // // 检查页面是否是空的, 如果是, 则新建一个"点击"创建的蒙层
+  // window.roamAlphaAPI.ui.components.renderBlock({
+  //   uid,
+  //   el: el as HTMLElement,
+  // });
 };
 
 const create_block_on_page = async (uid: string) => {
