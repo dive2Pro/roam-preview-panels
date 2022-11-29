@@ -139,7 +139,7 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
         content: (panel: Panel) => {
           const blockEl = document.createElement("div");
           blockEl.id = EL_ID;
-          blockEl.className = is_page(block) ? "page" : "";
+          // blockEl.className = is_page(block) ? "page" : "";
           panel.content.append(blockEl);
 
           if (is_page_empty(block)) {

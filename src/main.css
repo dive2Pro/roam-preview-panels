@@ -4,13 +4,13 @@
 .jsPanel {
   background-color: inherit !important;
 }
-.jsPanel-content .page > div:first-child > .rm-block-main .roam-block {
+.jsPanel-content .page  .rm-block-main .roam-block {
   /* margin-top: -30px; */
   /* margin-left: -30px; */
   position: relative;
 }
 
-.jsPanel-content .page > div > .rm-block-main:first-child .roam-block:after {
+.jsPanel-content .page > div:nth-child(2) > div > .rm-block-main:first-child  .roam-block:after {
   position: absolute;
   top: 0;
   content: "Page's \"block\", better leave it empty";

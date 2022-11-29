@@ -48,11 +48,14 @@ export function BreadcrumbsBlock(props: { uid: string }) {
   const [parents, setParents] = useState<ReversePullBlock[]>([]);
   useEffect(() => {
     const parentsBlocks = getStrFromParentsOf(uid);
-    // console.log(parentsBlocks);
+    console.log(parentsBlocks);
     setParents(parentsBlocks);
   }, [uid]);
+
+    
   return (
     <div
+      className={parents.length ? "" : "page"}
       onClickCapture={(e) => {
         const target = e.target as HTMLDivElement;
         if (target.closest(".controls.rm-block__controls")) {
@@ -117,9 +120,6 @@ export function BreadcrumbsBlock(props: { uid: string }) {
                 cursor: "pointer",
               }}
               onClick={() => {
-                if (block[":node/title"]) {
-                  return;
-                }
                 setUid(block[":block/uid"]);
               }}
             >
