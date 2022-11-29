@@ -4,16 +4,21 @@
 .jsPanel {
   background-color: inherit !important;
 }
-.jsPanel-content .page  .rm-block-main .roam-block {
+.jsPanel-content .page .rm-block-main .roam-block {
   /* margin-top: -30px; */
   /* margin-left: -30px; */
   position: relative;
 }
 
-.jsPanel-content .page > div:nth-child(2) > div > .rm-block-main:first-child  .roam-block:after {
+.jsPanel-content
+  .page
+  > div:nth-child(2)
+  > div
+  > .rm-block-main:first-child
+  .roam-block:after {
   position: absolute;
   top: 0;
-  content: "Page's \"block\", better leave it empty";
+  content: 'Page\'s "block", better leave it empty';
   bottom: 0;
   right: 0;
   left: 0;
@@ -81,4 +86,20 @@
 .flex-row {
   display: flex;
   flex-direction: row;
+}
+
+.jsPanel-content .block-breadcrumbs {
+  flex-wrap: wrap;
+  margin-bottom: 5px;
+  display: flex;
+  flex-direction: row;
+  padding: 5px 5px 5px 8px;
+}
+
+.jsPanel-content .block-breadcrumbs span.block-br-item {
+  white-space: unset;
+  align-items: center;
+  display: inline-flex;
+  color: #5c7080;
+  cursor: pointer;
 }

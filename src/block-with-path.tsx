@@ -52,26 +52,27 @@ export function BreadcrumbsBlock(props: { uid: string }) {
     setParents(parentsBlocks);
   }, [uid]);
 
-    
   return (
     <div
       className={parents.length ? "" : "page"}
       onClickCapture={(e) => {
         const target = e.target as HTMLDivElement;
         if (target.closest(".controls.rm-block__controls")) {
-          e.preventDefault();
-          e.stopPropagation();
           const t = target
             .closest("div.rm-block-main")
             .querySelector("div.rm-block__input");
           const tuid = t.id.split("").splice(-9).join("");
-          setUid(tuid);
-          setTimeout(() => {
-            const portal = document
-              .querySelector(".rm-bullet__tooltip")
-              .closest(".bp3-portal");
-            portal.parentElement.removeChild(portal);
-          }, 1000);
+          if (e.altKey) {
+            e.preventDefault();
+            e.stopPropagation();
+            setUid(tuid);
+            setTimeout(() => {
+              const portal = document
+                .querySelector(".rm-bullet__tooltip")
+                ?.closest(".bp3-portal");
+              portal?.parentElement?.removeChild(portal);
+            }, 1000);
+          }
 
           return true;
         }
@@ -99,26 +100,12 @@ export function BreadcrumbsBlock(props: { uid: string }) {
     >
       <div
         className="block-breadcrumbs"
-        style={{
-          flexWrap: "wrap",
-          marginBottom: 5,
-          display: "flex",
-          flexDirection: "row",
-          padding: 5,
-        }}
       >
         {parents.map((block, index, ary) => {
           const s = block[":block/string"] || block[":node/title"];
           return (
             <span
               className="block-br-item"
-              style={{
-                whiteSpace: "unset",
-                alignItems: "center",
-                display: "inline-flex",
-                color: "#5C7080",
-                cursor: "pointer",
-              }}
               onClick={() => {
                 setUid(block[":block/uid"]);
               }}
