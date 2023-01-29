@@ -103,3 +103,24 @@
   color: #5c7080;
   cursor: pointer;
 }
+
+
+
+@media only screen and (min-width: 600px) {
+  .jsPanel-content .panel-title {
+      max-width: 500px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+  }
+}
+
+
+@media only screen and (max-width: 600px) {
+  .jsPanel-content .panel-title {
+      width: calc(100vw - 100px);
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+  }
+}
