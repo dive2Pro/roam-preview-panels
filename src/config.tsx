@@ -4,6 +4,18 @@ import { CONSTANTS } from "./constants";
 import { session_init } from "./session-config";
 import { get_current_panel_injson } from "./panel-status";
 
+let API: RoamExtensionAPI;
+
+export const read_panel_size_data = (
+) => {
+
+  return {
+    width: Number(API.settings.get(CONSTANTS.id["panel-width"]) || 400),
+    height:
+      Number(API.settings.get(CONSTANTS.id["panel-height"]) || 200)
+  };
+}
+
 export const read_panel_size = (
   extensionAPI: RoamExtensionAPI,
   panel?: PanelState
@@ -11,9 +23,8 @@ export const read_panel_size = (
   if (panel) {
     return `${panel.position.width} ${panel.position.height}`;
   }
-  return `${extensionAPI.settings.get(CONSTANTS.id["panel-width"]) || 400} ${
-    extensionAPI.settings.get(CONSTANTS.id["panel-height"]) || 200
-  } `;
+  return `${extensionAPI.settings.get(CONSTANTS.id["panel-width"]) || 400} ${extensionAPI.settings.get(CONSTANTS.id["panel-height"]) || 200
+    } `;
 };
 
 /**
@@ -27,7 +38,7 @@ export const read_panels_status = (extensionAPI: RoamExtensionAPI) => {
   if (result) {
     try {
       return JSON.parse(result) as Record<string, PanelState>;
-    } catch (e) {}
+    } catch (e) { }
   }
   return {};
 };
@@ -82,6 +93,7 @@ export const read_modifier = (extensionAPI: RoamExtensionAPI) => {
 };
 
 export function panel_config_create(extensionAPI: RoamExtensionAPI) {
+  API = extensionAPI;
   function PanelStatusContent() {
     const [state, setState] = useState({});
     return (

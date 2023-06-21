@@ -10,6 +10,7 @@ import {
   read_panel_size,
   reset_panel_status,
   save_panels_status_initial,
+  read_panel_size_data,
 } from "./config";
 import { CONSTANTS } from "./constants";
 import { BreadcrumbsBlock } from "./block-with-path";
@@ -133,7 +134,7 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
           blockEl.id = EL_ID;
           // blockEl.className = is_page(block) ? "page" : "";
           panel.content.append(blockEl);
-         
+
         },
         headerTitle: `<div class="panel-title">${get_block_title(block)}</div>`,
         position: adjust_panel_start_position(rect, panel),
@@ -231,6 +232,7 @@ const adjust_panel_start_position = (
   rect: { x: number; y: number },
   panel?: PanelState
 ) => {
+  console.log(rect, panel , ' adjust')
   if (panel) {
     return {
       my: "left-top",
@@ -239,8 +241,9 @@ const adjust_panel_start_position = (
       offsetY: rect.y,
     };
   }
+  const config = read_panel_size_data()
   const window_height = window.innerHeight;
-  if (rect.y + 230 >= window_height) {
+  if (rect.y + config.height >= window_height) {
     return {
       my: "left-bottom",
       at: "left-top",
@@ -462,7 +465,7 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
 
 const onRouteChange = (cb: () => void) => {
   window.addEventListener("hashchange", cb)
-  
+
   return () => {
     window.removeEventListener('hashchange', cb)
   };
