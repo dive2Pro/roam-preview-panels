@@ -99,26 +99,18 @@ const render_roam_block_on = (panelId: string, uid: string) => {
   // });
 };
 
-const create_block_on_page = async (uid: string) => {
-  const block_uid = window.roamAlphaAPI.util.generateUID();
-  await window.roamAlphaAPI.data.block.create({
-    location: {
-      "parent-uid": uid,
-      order: 0,
-    },
-    block: {
-      string: "",
-      uid: block_uid,
-    },
-  });
-  window.roamAlphaAPI.ui.setBlockFocusAndSelection({
-    location: {
-      "block-uid": block_uid,
-      "window-id": "main-window",
-    },
-  });
-};
-
+type SetTimeout = ReturnType<typeof setTimeout>
+const delayCreateIds = {
+  data: [] as SetTimeout[],
+  add(id: SetTimeout) {
+    delayCreateIds.data.push(id)
+  },
+  clean() {
+    delayCreateIds.data.forEach(id => {
+      clearTimeout(id)
+    })
+  }
+}
 const get_panel_id = (uid: string) => "panel-" + uid;
 let id_increment = 0;
 
@@ -183,6 +175,7 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
     let createFn = (delay: number) => {
       let timeoutId = setTimeout(init, delay);
       const origin_fn = destroyFn;
+      delayCreateIds.add(timeoutId)
       destroyFn = () => {
         clearInterval(timeoutId);
         origin_fn();
@@ -289,6 +282,7 @@ function create_on_block_context_memu(
       isRightMB = e.which == 3;
     else if ("button" in e)
       // IE, Opera
+      // @ts-ignore
       isRightMB = e.button == 2;
     if (isRightMB) {
       block_memu_position.x = e.clientX + 10;
@@ -420,6 +414,7 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
   window.addEventListener("mouseover", on_mouse_in);
   window.addEventListener("mouseout", on_mouse_out);
   const routeSub = onRouteChange(() => {
+    delayCreateIds.clean();
     document.querySelectorAll(".jsPanel").forEach((panelEl) => {
       const panel = get_panel_from_target(panelEl);
       if (!panel._manager) {
@@ -466,16 +461,10 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
 }
 
 const onRouteChange = (cb: () => void) => {
-  const onhashchange = window.onhashchange?.bind(window);
-
-  window.onhashchange = (evt) => {
-    onhashchange?.call(window, evt);
-    setTimeout(() => {
-      cb();
-    }, 200);
-  };
+  window.addEventListener("hashchange", cb)
+  
   return () => {
-    window.onhashchange = onhashchange;
+    window.removeEventListener('hashchange', cb)
   };
 };
 function watch_roam_block_string_change_on(
