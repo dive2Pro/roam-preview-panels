@@ -141,17 +141,7 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
           blockEl.id = EL_ID;
           // blockEl.className = is_page(block) ? "page" : "";
           panel.content.append(blockEl);
-
-          if (is_page_empty(block)) {
-            let el = document.createElement("p");
-            el.className = "empty-add";
-            el.textContent = "The page is empty, click to add content.";
-            panel.content.append(el);
-            el.addEventListener("click", () => {
-              create_block_on_page(uid);
-              el.parentNode.removeChild(el);
-            });
-          }
+         
         },
         headerTitle: `<div class="panel-title">${get_block_title(block)}</div>`,
         position: adjust_panel_start_position(rect, panel),

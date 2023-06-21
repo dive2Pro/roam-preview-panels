@@ -1,5 +1,6 @@
 .jsPanel-content .page {
   overflow: hidden;
+  padding: 10px;
 }
 .jsPanel {
   background-color: inherit !important;
