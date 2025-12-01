@@ -18,6 +18,7 @@ import { useState } from "react";
 import ReactDOM from "react-dom";
 import { CONSTANTS } from "./constants";
 import { get_current_panel_injson } from "./panel-status";
+import { RoamExtensionAPI, SettingConfig } from "roam-types";
 
 const use_forceupdate = () => {
   const updater = useState(0)[1];
@@ -356,11 +357,12 @@ export function session_init(extensionAPI: RoamExtensionAPI) {
   return {
     config: {
       id: "panel-sessions-operator",
+      name: "panel-sessions-operator",
       action: {
-        type: "reactComponent",
+        type: "reactComponent" as const,
         component: PanelSessions,
       },
-    },
+    } as SettingConfig,
     uninstall() {
       remove_topbar_menu();
     },

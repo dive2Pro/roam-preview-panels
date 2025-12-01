@@ -7,6 +7,7 @@ export const CONSTANTS = {
     delay: "delay",
     modifier: "modifier",
     "panel-sessions": "panel-sessions",
+    "check-panel-status": "check-panel-status",
   },
   event: {
     // id: event_ids,

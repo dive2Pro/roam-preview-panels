@@ -2,7 +2,7 @@ import { jsPanel, Panel } from "jspanel4";
 import ReactDOM from 'react-dom';
 import "jspanel4/es6module/jspanel.min.css";
 import "./main.css";
-import { PullBlock } from "roamjs-components/types";
+
 import {
   read_delay_ms,
   read_modifier,
@@ -14,6 +14,7 @@ import {
 } from "./config";
 import { CONSTANTS } from "./constants";
 import { BreadcrumbsBlock } from "./block-with-path";
+import { PullResult, RoamExtensionAPI } from "roam-types";
 const ATTRIBUTE_PAGE = "data-link-uid";
 const ATTRIBUTE_BLOCK = "data-uid";
 const ATTRIBUTE_TAG = "data-tag";
@@ -66,15 +67,15 @@ const delay = async (ms: number) => {
 const get_block = (uid: string) => {
   return window.roamAlphaAPI.pull("[*]", [":block/uid", uid]);
 };
-const is_page = (block: PullBlock) => {
+const is_page = (block: PullResult) => {
   return block[":node/title"] !== undefined;
 };
 
-const is_page_empty = (block: PullBlock) => {
+const is_page_empty = (block: PullResult) => {
   return !block[":block/children"] && block[":block/string"] === undefined;
 };
 
-const get_block_title = (block: PullBlock) =>
+const get_block_title = (block: PullResult) =>
   block[":node/title"] || block[":block/string"];
 
 const CONFIG_KEYS = {
@@ -262,7 +263,7 @@ const adjust_panel_start_position = (
 function create_on_block_context_memu(
   panel_factory: ReturnType<typeof panel_creator>
 ) {
-  const LABEL = "open in preview panel";
+  const LABEL = "Preview Panels: open in preview panel";
   let block_memu_position = {
     x: 0,
     y: 0,
@@ -301,7 +302,61 @@ function create_on_block_context_memu(
 
 export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
   const panel_factory = panel_creator(extensionAPI);
+  let clickPointer:  {
+    x: number,
+    y: number
+  }
+  document.body.addEventListener("pointerdown", (e) => {
+    if(e.button === 2) {
+      e.preventDefault();
+         console.log({ e });
+         clickPointer = {
+           x: e.clientX,
+           y: e.clientY,
+         };
+    }
+  });
 
+  window.roamAlphaAPI.ui.pageRefContextMenu.addCommand({
+    label: "Preview Panels: open in preview panel",
+    "display-conditional": (e) => true,
+    callback: (e) => {
+      document.querySelector(`[block-input$="${e["block-uid"]}"]`)
+       panel_factory(
+        {
+          x: clickPointer.x + 10,
+          y: clickPointer.y + 10,
+        },
+        e["block-uid"]
+      )?.create(10);
+    },
+  });
+  window.roamAlphaAPI.ui.blockRefContextMenu.addCommand({
+    label: "Preview Panels: open in preview panel",
+    "display-conditional": (e) => true,
+    callback: (e) => {
+      panel_factory(
+        {
+          x: clickPointer.x + 10,
+          y: clickPointer.y + 10,
+        },
+        e["block-uid"]
+      )?.create(10);
+    },
+  });
+  window.roamAlphaAPI.ui.pageLinkContextMenu.addCommand({
+    label: "Preview Panels: open in preview panel",
+    "display-conditional": (e) => true,
+    callback: (e) => {
+      panel_factory(
+        {
+          x: clickPointer.x + 10,
+          y: clickPointer.y + 10,
+        },
+        e["page-uid"]
+      )?.create(10);
+    },
+  });
   function create_panels_from_panelsession(
     session: Record<string, PanelState>
   ) {
@@ -446,6 +501,16 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
     unsub_panel_selected();
     routeSub();
     unsub_create_context();
+    window.roamAlphaAPI.ui.blockRefContextMenu.removeCommand({
+      label: "Preview Panels: open in preview panel",
+    });
+    window.roamAlphaAPI.ui.pageRefContextMenu.removeCommand({
+      label: "Preview Panels: open in preview panel",
+    });
+    window.roamAlphaAPI.ui.pageLinkContextMenu.removeCommand({
+      label: "Preview Panels: open in preview panel",
+    });
+    
     window.removeEventListener("mouseover", on_mouse_in);
     window.removeEventListener("mouseout", on_mouse_out);
     document.removeEventListener(

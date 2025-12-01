@@ -3,6 +3,7 @@ import { Button, EditableText, HTMLSelect, Menu } from "@blueprintjs/core";
 import { CONSTANTS } from "./constants";
 import { session_init } from "./session-config";
 import { get_current_panel_injson } from "./panel-status";
+import { RoamExtensionAPI, SettingConfig, SettingsPanelConfig } from "roam-types";
 
 let API: RoamExtensionAPI;
 
@@ -190,7 +191,7 @@ export function panel_config_create(extensionAPI: RoamExtensionAPI) {
         name: "Initial panel width",
         description: "entry any valid positive number",
         action: {
-          type: "input",
+          type: "input" as const,
           placeholder: "400",
         },
       },
@@ -199,7 +200,7 @@ export function panel_config_create(extensionAPI: RoamExtensionAPI) {
         name: "Initial panel height",
         description: "entry any valid positive number",
         action: {
-          type: "input",
+          type: "input" as const,
           placeholder: "200",
         },
       },
@@ -212,13 +213,14 @@ export function panel_config_create(extensionAPI: RoamExtensionAPI) {
         },
       },
       {
-        id: "check-panel-status",
+        id: CONSTANTS.id["check-panel-status"],
         name: "Check the status of the active panels",
+        description: "Check the status of the active panels",
         action: { type: "reactComponent", component: PanelStatusContent },
       },
       session_config.config,
-    ],
-  };
+    ] as SettingConfig[],
+  } as const;
 
   extensionAPI.settings.panel.create(panel_config);
   extensionAPI.settings.set(

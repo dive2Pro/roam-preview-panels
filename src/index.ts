@@ -1,3 +1,4 @@
+import { RoamExtensionAPI } from "roam-types";
 import { panel_config_create } from "./config";
 import { hoverPreviewInit } from "./hover-preview";
 

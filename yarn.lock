@@ -5467,6 +5467,11 @@ rimraf@^3.0.0, rimraf@^3.0.2:
   dependencies:
     glob "^7.1.3"
 
+roam-types@^1.0.6:
+  version "1.0.6"
+  resolved "https://registry.npmjs.org/roam-types/-/roam-types-1.0.6.tgz#d3a575ce3d79b95485ad24f8eddc780330020c87"
+  integrity sha512-yaWLI3q9AejLVWPxLRbS6RrmHQlIRyH1q2sRJqr2nGTTr3gAbntTnHsNvwOTuHzI8xOC978GWkHb78Tnx5RSUQ==
+
 roamjs-components@^0.72.9:
   version "0.72.11"
   resolved "https://registry.yarnpkg.com/roamjs-components/-/roamjs-components-0.72.11.tgz#7928b8be935090ce9a9761c1c79d002385182e6f"
