@@ -1,5 +1,5 @@
 import { jsPanel, Panel } from "jspanel4";
-import ReactDOM from 'react-dom';
+import ReactDOM from "react-dom";
 import "jspanel4/es6module/jspanel.min.css";
 import "./main.css";
 
@@ -101,18 +101,18 @@ const render_roam_block_on = (panelId: string, uid: string) => {
   // });
 };
 
-type SetTimeout = ReturnType<typeof setTimeout>
+type SetTimeout = ReturnType<typeof setTimeout>;
 const delayCreateIds = {
   data: [] as SetTimeout[],
   add(id: SetTimeout) {
-    delayCreateIds.data.push(id)
+    delayCreateIds.data.push(id);
   },
   clean() {
-    delayCreateIds.data.forEach(id => {
-      clearTimeout(id)
-    })
-  }
-}
+    delayCreateIds.data.forEach((id) => {
+      clearTimeout(id);
+    });
+  },
+};
 const get_panel_id = (uid: string) => "panel-" + uid;
 let id_increment = 0;
 
@@ -135,7 +135,6 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
           blockEl.id = EL_ID;
           // blockEl.className = is_page(block) ? "page" : "";
           panel.content.append(blockEl);
-
         },
         headerTitle: `<div class="panel-title">${get_block_title(block)}</div>`,
         position: adjust_panel_start_position(rect, panel),
@@ -177,7 +176,7 @@ const panel_creator = (extensionAPI: RoamExtensionAPI) => {
     let createFn = (delay: number) => {
       let timeoutId = setTimeout(init, delay);
       const origin_fn = destroyFn;
-      delayCreateIds.add(timeoutId)
+      delayCreateIds.add(timeoutId);
       destroyFn = () => {
         clearInterval(timeoutId);
         origin_fn();
@@ -233,7 +232,7 @@ const adjust_panel_start_position = (
   rect: { x: number; y: number },
   panel?: PanelState
 ) => {
-  console.log(rect, panel , ' adjust')
+  console.log(rect, panel, " adjust");
   if (panel) {
     return {
       my: "left-top",
@@ -242,7 +241,7 @@ const adjust_panel_start_position = (
       offsetY: rect.y,
     };
   }
-  const config = read_panel_size_data()
+  const config = read_panel_size_data();
   const window_height = window.innerHeight;
   if (rect.y + config.height >= window_height) {
     return {
@@ -302,27 +301,28 @@ function create_on_block_context_memu(
 
 export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
   const panel_factory = panel_creator(extensionAPI);
-  let clickPointer:  {
-    x: number,
-    y: number
-  }
-  document.body.addEventListener("pointerdown", (e) => {
-    if(e.button === 2) {
-      e.preventDefault();
-         console.log({ e });
-         clickPointer = {
-           x: e.clientX,
-           y: e.clientY,
-         };
-    }
-  });
+  let clickPointer: {
+    x: number;
+    y: number;
+  };
 
+  const handle_right_pointer_down = (e: PointerEvent) => {
+    if (e.button === 2) {
+      clickPointer = {
+        x: e.clientX,
+        y: e.clientY,
+      };
+    }
+  };
+
+  document.body.addEventListener("pointerdown", handle_right_pointer_down);
+  
   window.roamAlphaAPI.ui.pageRefContextMenu.addCommand({
     label: "Preview Panels: open in preview panel",
     "display-conditional": (e) => true,
     callback: (e) => {
-      document.querySelector(`[block-input$="${e["block-uid"]}"]`)
-       panel_factory(
+      document.querySelector(`[block-input$="${e["block-uid"]}"]`);
+      panel_factory(
         {
           x: clickPointer.x + 10,
           y: clickPointer.y + 10,
@@ -510,7 +510,7 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
     window.roamAlphaAPI.ui.pageLinkContextMenu.removeCommand({
       label: "Preview Panels: open in preview panel",
     });
-    
+    document.body.removeEventListener("pointerdown", handle_right_pointer_down);
     window.removeEventListener("mouseover", on_mouse_in);
     window.removeEventListener("mouseout", on_mouse_out);
     document.removeEventListener(
@@ -529,10 +529,10 @@ export function hoverPreviewInit(extensionAPI?: RoamExtensionAPI) {
 }
 
 const onRouteChange = (cb: () => void) => {
-  window.addEventListener("hashchange", cb)
+  window.addEventListener("hashchange", cb);
 
   return () => {
-    window.removeEventListener('hashchange', cb)
+    window.removeEventListener("hashchange", cb);
   };
 };
 function watch_roam_block_string_change_on(
